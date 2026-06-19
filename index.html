@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./src/style.css">
+    <title>tp-4</title>
+  </head>
+  <body>
+    <div id="app">
+        <section id="guest-section" style="display: none;">
+            <h1>Bienvenido a Food Store 🍔</h1>
+            <p>Por favor, elegí una opción para continuar:</p>
+            <div class="actions">
+                <a href="/src/pages/auth/login/login.html" class="btn">Iniciar Sesión</a>
+                <a href="/src/pages/auth/registro/registro.html" class="btn">Registrarse</a>
+            </div>
+        </section>
+
+        <section id="session-notice" style="display: none;">
+            <div class="modal-content">
+                <h2>Sesión detectada 👤</h2>
+                <p>Ya tenés una sesión iniciada como: <strong id="user-email"></strong></p>
+                <div class="actions">
+                    <button id="btn-continue" class="btn-primary">Continuar al Home</button>
+                    <button id="btn-logout" class="btn-secondary">Cerrar Sesión</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

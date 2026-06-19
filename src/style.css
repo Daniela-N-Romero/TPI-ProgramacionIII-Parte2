@@ -1,0 +1,151 @@
+:root {
+  --primary: #646cff;
+  --primary-hover: #535bf2;
+  --card-bg: #ffffff;
+  --notes: #a7a7a7;
+}
+
+#content-body {
+  display: none; 
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  justify-content: center;
+}
+
+#app {
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+  text-align: center;
+}
+
+/* Tarjetas y Contenedores */
+section, .card {
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+h1 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: var(--primary);
+}
+
+/* Formularios */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  text-align: left;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+input {
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* Botones */
+button, .btn {
+  background-color: var(--primary);
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  text-decoration: none;
+  display: inline-block;
+}
+
+button:hover, .btn:hover {
+  background-color: var(--primary-hover);
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+
+/* Enlaces */
+a {
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  display: inline-block;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/*  Estilos Login / Registro  */
+
+.test-data {
+  display:block;
+  text-align:left;
+  font-size: 0.8rem;
+  color: var(--notes);
+}
+.test-data:first-of-type{
+  font-weight: 600;
+}
+
+.test-data + .test-data {
+  margin-top: 0.2rem;
+}
+
+.session-card p{
+  font-size:0.9rem;
+}
+
+.session-card p a{
+  text-decoration: underline;
+  font-weight:600;
+}
+.back-to-home{
+  margin-bottom:2rem;
+}
+
+#mensajesValidacion p {
+  margin: 2px 0;
+  font-size: 0.9em;
+}
+.invalido {
+  color: #808080;
+}
+.valido {
+  color: #52c41a; 
+}
