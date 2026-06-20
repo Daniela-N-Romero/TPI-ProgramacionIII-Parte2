@@ -1,5 +1,4 @@
-import type { IUser } from "../../../types/IUser";
-import type { Rol } from "../../../types/Rol";
+import type { Rol, IUserDTO } from "../../../types/IUser";
 import { findUserByEmail, rolRedirect, validateEmail, validatePassword } from "../../../utils/auth/auth";
 import { loginUser } from "../../../utils/localStorage/userStorage";
 
@@ -32,8 +31,12 @@ form.addEventListener("submit", async (e: SubmitEvent) => {
   }
 
   if (usuarioExistente.password === valuePassword) {
-      const user: IUser = {
+      const user: IUserDTO = {
+        id: usuarioExistente.id,
         mail: usuarioExistente.mail,
+        nombre: usuarioExistente.nombre,
+        apellido: usuarioExistente.apellido,
+        celular: usuarioExistente.celular,
         rol: usuarioExistente.rol as Rol,
         loggedIn: true,
       };

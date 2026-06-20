@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Food Store</title>
     <link rel="stylesheet" href="/src/style.css">
 </head>
+
 <body>
 
     <header class="header-nav">
@@ -19,75 +21,66 @@
 
     <div class="app-container">
         <aside class="sidebar" id="app-sidebar">
-            <h3 class="sidebar-title">Administracíon</h3>
-            <h4 class="sidebar-subtitle">Panel de control</h4>
-            <ul class="sidebar-menu">
-                <li class="active"><a href="/adminPanel">Dashboard</a></li>
-                <li><a href="/manageCategories">Categorias</a></li>
-                <li><a href="/manageProducts">Productos</a></li>
-                <li><a href="/manageOrders">Pedidos</a></li>
-                <hr class="sidebar-divider">
-                <li><a href="/tienda">Ver Tienda</a></li>             
-            </ul>
+            
         </aside>
 
         <main class="main-content" id="main-view">
             <div class="dashboard-header">
-    <h1>Panel de Administración</h1>
-</div>
+                <h1>Panel de Administración</h1>
+            </div>
 
-<div class="stats-grid">
-    <div class="stat-card card-purple">
-        <div class="stat-info">
-            <span class="icon">📁</span>
-            <h3>Categorías</h3>
-            <p class="counter">0</p>
-        </div>
-        <button class="btn-manage">Gestionar</button>
-    </div>
-    <div class="stat-card card-pink">
-        <div class="stat-info">
-            <span class="icon">🍔</span>
-            <h3>Productos</h3>
-            <p class="counter">0</p>
-        </div>
-        <button class="btn-manage">Gestionar</button>
-    </div>
-    <div class="stat-card card-blue">
-        <div class="stat-info">
-            <span class="icon">📦</span>
-            <h3>Pedidos</h3>
-            <p class="counter">0</p>
-        </div>
-        <button class="btn-manage">Gestionar</button>
-    </div>
-    <div class="stat-card card-green">
-        <div class="stat-info">
-            <span class="icon">✅</span>
-            <h3>Disponibles</h3>
-            <p class="counter">0</p>
-        </div>
-        <span class="card-tag">Productos activos</span>
-    </div>
-</div>
+            <div class="stats-grid">
+                <div class="stat-card card-purple">
+                    <div class="stat-info">
+                        <span class="icon">📁</span>
+                        <h3>Categorías</h3>
+                        <p class="counter">0</p>
+                    </div>
+                    <button class="btn-manage">Gestionar</button>
+                </div>
+                <div class="stat-card card-pink">
+                    <div class="stat-info">
+                        <span class="icon">🍔</span>
+                        <h3>Productos</h3>
+                        <p class="counter">0</p>
+                    </div>
+                    <button class="btn-manage">Gestionar</button>
+                </div>
+                <div class="stat-card card-blue">
+                    <div class="stat-info">
+                        <span class="icon">📦</span>
+                        <h3>Pedidos</h3>
+                        <p class="counter">0</p>
+                    </div>
+                    <button class="btn-manage">Gestionar</button>
+                </div>
+                <div class="stat-card card-green">
+                    <div class="stat-info">
+                        <span class="icon">✅</span>
+                        <h3>Disponibles</h3>
+                        <p class="counter">0</p>
+                    </div>
+                    <span class="card-tag">Productos activos</span>
+                </div>
+            </div>
 
-<div class="summary-panel">
-    <h3>📊 Resumen Rápido</h3>
-    <p class="loading-text" style="color: var(--text-muted); margin-top: 10px;">Cargando estadísticas...</p>
-</div>
-            </main>
+            <div class="summary-panel">
+                <h3>📊 Resumen Rápido</h3>
+                <p class="loading-text" style="color: var(--text-muted); margin-top: 10px;">Cargando estadísticas...</p>
+            </div>
+        </main>
     </div>
 
     <div class="modal-overlay" id="global-modal">
         <div class="modal-card">
             <button class="modal-close" id="close-modal">&times;</button>
             <div id="modal-content">
-                </div>
+            </div>
         </div>
     </div>
 
     <script type="module" src="/src/utils/layout.ts"></script>
-    <script type ="module" src="/src/pages/admin/adminHome/home.ts"></script>
+    <script type="module" src="/src/pages/admin/adminHome/home.ts"></script>
 
 </body>
 

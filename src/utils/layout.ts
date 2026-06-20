@@ -49,13 +49,43 @@ const renderNavbar = () => {
 }
 
 const renderSidebar = () => {
+    const appSidebar = document.getElementById('app-sidebar') as HTMLElement;
+    
+    if (user?.rol === "ADMIN") {
+        appSidebar.innerHTML = `
+            <h3 class="sidebar-title">Administracíon</h3>
+            <h4 class="sidebar-subtitle">Panel de control</h4>
+            <ul class="sidebar-menu">
+                <li class="active"><a href="/adminPanel">Dashboard</a></li>
+                <li><a href="/manageCategories">Categorias</a></li>
+                <li><a href="/manageProducts">Productos</a></li>
+                <li><a href="/manageOrders">Pedidos</a></li>
+                <hr class="sidebar-divider">
+                <li><a href="/tienda">Ver Tienda</a></li>
+            </ul>
+            `;
+
+    } else {
+        // Si no hay usuario o el rol es de invitado, se asume invitado
+        appSidebar.innerHTML = `
+            <h3 class="sidebar-title">Categorías</h3>
+            <h4 class="sidebar-subtitle">Filtra por categoria</h4>
+            <ul class="sidebar-menu">
+                <li class="active"><a href="#">📦 Todos los productos</a></li>
+                <li><a href="#">🍔 Hamburguesas</a></li>
+                <li><a href="#">🍕 Pizzas</a></li>
+                <li><a href="#">🥟 Empanadas</a></li>
+                <li><a href="#">🍟 Papas Fritas</a></li>             
+            </ul>
+            `;
+    }
+
 
 }
 
 const renderLayout = () => {
     renderNavbar();
     renderSidebar();
-    // Aquí se pueden agregar más funciones para renderizar otras partes de la página
 }
 
 renderLayout();

@@ -1,4 +1,4 @@
-import type { IUserStorage } from '../../../types/IUserStorage';
+import type { IUserStorage } from '../../../types/IUser';
 import { rolRedirect, validatePassword } from '../../../utils/auth/auth';
 import { getUsers, loginUser, saveUser } from '../../../utils/localStorage/userStorage'
 
@@ -42,9 +42,11 @@ form?.addEventListener("submit", (e: SubmitEvent) => {
         mail: valueEmail,
         //solo creamos usuarios clientes. El Admin se da por defecto
         rol: 'USUARIO',
-        loggedIn: true,
+        nombre: "",
+        apellido: "",
+        celular: "",
         password: valuePassword,
-        id: crypto.randomUUID()
+        id: getUsers().length+1
     };
 
     const existeUsuario = users.some((user) => user.mail === valueEmail);
@@ -54,8 +56,8 @@ form?.addEventListener("submit", (e: SubmitEvent) => {
     }
 
     saveUser(newUser)
-    const { password, id, ...userToLog } = newUser;
-    loginUser(userToLog)
+    const { password, ...userToLog } = newUser;
+    loginUser({...userToLog, loggedIn:true})
     alert("Usuario Registrado. Redirigiendo al home...")
     setTimeout(() => rolRedirect(newUser.rol, "/adminPanel", "/tienda"), 1500)
 
