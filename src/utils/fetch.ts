@@ -35,3 +35,6 @@ export async function getCategories(): Promise<ICategory[]> {
 export async function getOrders(): Promise<IOrder[]> {
   return await fetchFunction<IOrder[]>("/data/pedidos.json", "Error al buscar los pedidos.");
 }
+
+
+

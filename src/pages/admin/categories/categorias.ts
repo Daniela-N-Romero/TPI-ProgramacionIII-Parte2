@@ -1,4 +1,4 @@
-import { checkAuthUser } from "../../../utils/auth";
+import { checkAuthUser } from "../../../utils/auth/auth";
 
 const initPage = () => {
   const isAuthorized = checkAuthUser("ADMIN", "/tienda");

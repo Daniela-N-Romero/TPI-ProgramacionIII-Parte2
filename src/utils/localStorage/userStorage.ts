@@ -1,4 +1,6 @@
-import type { IUserDTO, IUserStorage} from "../types/IUser";
+import type { IUserDTO, IUserStorage} from "../../types/IUser";
+
+
 
 
 //funciones para acceder y modificar la sesion activa de usuario,

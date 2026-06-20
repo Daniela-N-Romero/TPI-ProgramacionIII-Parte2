@@ -1,7 +1,7 @@
 import type { IUser } from "../../../types/IUser";
 import type { Rol } from "../../../types/Rol";
-import { findUserByEmail, rolRedirect, validateEmail, validatePassword } from "../../../utils/auth";
-import { loginUser } from "../../../utils/localStorage";
+import { findUserByEmail, rolRedirect, validateEmail, validatePassword } from "../../../utils/auth/auth";
+import { loginUser } from "../../../utils/localStorage/userStorage";
 
 const form = document.getElementById("form") as HTMLFormElement;
 const inputEmail = document.getElementById("email") as HTMLInputElement;

@@ -1,5 +1,5 @@
-import { getUser } from "./localStorage";
-import { logout } from "./auth";
+import { getUser } from "./localStorage/userStorage";
+import { logout } from "./auth/auth";
 
 const links = {
     index: "/index.html",
@@ -12,7 +12,7 @@ const links = {
     storeHome: "/tienda",
     cart: "/carrito",
     productDetail: "/producto",
-    clientOrders: "/myOrders"
+    clientOrders: "/pedidos"
 }
 
 const user = getUser();

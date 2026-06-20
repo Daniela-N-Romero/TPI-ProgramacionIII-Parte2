@@ -1,5 +1,5 @@
-import { getUser } from "./utils/localStorage.ts"
-import { rolRedirect  } from "./utils/auth.ts";
+import { getUser } from "./utils/localStorage/userStorage.ts"
+import { rolRedirect  } from "./utils/auth/auth.ts";
 import {navigate} from "./utils/navigate.ts"
 
 document.addEventListener('DOMContentLoaded', () => {
