@@ -36,10 +36,10 @@ const filtrarPorCategoria = (): void => {
 };
 
 
-const renderSegunCategoria = (categoriaId: number | 'todas' = 'todas'): void => {
+const renderSegunCategoria = async (categoriaId: number | 'todas' = 'todas'): void => {
   const productsContainer = document.getElementById('products-container');
   if (!productsContainer) return;
-  const todosLosProductos = getProducts();
+  const todosLosProductos = await getProducts();
 
   let productosFiltrados = todosLosProductos.filter(producto => {
     const perteneceACategoria = categoriaId === 'todas' || producto.categoria.id === categoriaId;

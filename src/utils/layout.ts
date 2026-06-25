@@ -51,12 +51,12 @@ const renderNavbar = () => {
     btnLogout?.addEventListener("click", ()=> logout())
 }
 
-const renderSidebar = () => {
+const renderSidebar = async () => {
     const appSidebar = document.getElementById('app-sidebar') as HTMLElement;
     if (appSidebar){
     if (user.isUsuario || user.isInvitado || window.location.pathname === "/tienda") {
     
-            const categorias =  getCategories();
+            const categorias = await  getCategories();
     
             const categoriasHtml = categorias
                 .map(cat => `<li><a href="#" data-categoria-id="${cat.id}">${cat.nombre}</a></li>`)
@@ -89,11 +89,11 @@ const renderSidebar = () => {
 }
 }
 
-export const actualizarBadgeNavbar = (): void => {
+export const actualizarBadgeNavbar = async (): Promise<void> => {
   const badge = document.querySelector('#nav-links .badge') as HTMLElement;
   if (!badge) return;
   const user = getActiveUser(); 
-  const cart = getCartByEmail(user.mail);
+  const cart = await getCartByEmail(user.mail);
   const totalItems = cart.reduce((acc, item) => acc + item.cantidad, 0);
   badge.innerText = totalItems.toString();
 };

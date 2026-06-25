@@ -1,6 +1,6 @@
 import { validarAccesoRuta, obtenerEstadoCliente, navigate } from "../../../../src/utils/guards/guards";
 import { getProduct } from "../../../../src/utils/localStorage/productStorage";
-import { addToCart, getCart } from "../../../../src/utils/localStorage/cartStorage";
+import { addToCart } from "../../../../src/utils/localStorage/cartStorage";
 import { getActiveUser } from "../../../utils/localStorage/userStorage";
 import { actualizarBadgeNavbar } from "../../../utils/layout";
 

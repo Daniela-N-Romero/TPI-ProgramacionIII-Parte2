@@ -1,24 +1,21 @@
 import type { IProduct } from '../../types/IProduct';
-import type { ICartItem} from '../../types/ICart'
-import { removeElement, removeElementById, getElementsFromStorage, saveArray } from "./storageBase"
+import type { ICartItem } from '../../types/ICart'
+import { removeElementById, getElementsFromStorage, saveArray, removeElement } from "./storageBase"
 
-//Funciones para traer, modificar, crear y eliminar datos del storage
-//(para no modificar JSON original como se solicito en consigna TPI)
-export const getCart = () => getElementsFromStorage<ICartItem>("cart");
-export const removeFromCart = (productId: number) => removeElementById(productId, "cart");
-export const clearCart = () => removeElement("cart");
-export const saveCart = (cart: ICartItem[]) => saveArray(cart, "cart");
+//Funciones para traer, modificar, crear y eliminar datos del carrtio de local storage
 
-export const getCartByEmail = (email:string): ICartItem[] =>{
-  return JSON.parse(localStorage.getItem(`cart_${email}`) || "[]");
-}
-export const saveCartByEmail = (email:string, cart: ICartItem[]) =>{
-  localStorage.setItem(`cart_${email}`, JSON.stringify(cart));
-} 
+export const getCartByEmail = async (email: string) => await getElementsFromStorage<ICartItem>(`cart_${email}`);
+
+export const saveCartByEmail = (email: string, cart: ICartItem[]) => saveArray(cart, `cart_${email}`);
+
+export const removeFromCart = (email: string, productId: number) => removeElementById(productId, `cart_${email}`);
+
+export const clearCart = (email: string) => removeElement(`cart_${email}`);
+
 
 // Agregar al carito desde la tienda (o actualizar cantidad si ya existe) - TO DO: respetar el stock disponible 
-export function addToCart(product: IProduct, cantidad: number = 1, userEmail: string): void {
-  const cart = getCartByEmail(userEmail);
+export async function addToCart(product: IProduct, cantidad: number = 1, userEmail: string): Promise<void> {
+  const cart = await getCartByEmail(userEmail);
   const itemIndex = cart.findIndex(item => item.producto.id === product.id);
 
   if (itemIndex !== -1) {                       // Si ya existe, sumamos la cantidad 
@@ -39,20 +36,20 @@ export function addToCart(product: IProduct, cantidad: number = 1, userEmail: st
 //FUNCIONES AUXILIARES 
 
 // Función auxiliar para saber cuánto va sumando el total
-export function getCartTotal(): number {
-  const cart = getCart();
+export async function getCartTotal(userEmail: string): Promise<number> {
+  const cart = await getCartByEmail(userEmail);
   return cart.reduce((acc, item) => acc + item.subtotal, 0);
 }
 
 // Función auxiliar para saber cuánto va sumando el total
-export function getCartQuantity(): number {
-  const cart = getCart();
+export async function getCartQuantity(userEmail: string): Promise<number> {
+  const cart = await getCartByEmail(userEmail);
   return cart.reduce((acc, item) => acc + item.cantidad, 0);
 }
 
 // Modificar la cantidad exacta de un ítem (ej. desde un input en la vista del carrito)
-export function updateCartItemQuantity(productId: number, nuevaCantidad: number): void {
-  let cart = getCart();
+export async function updateCartItemQuantity(productId: number, nuevaCantidad: number, userEmail: string): Promise<void> {
+  let cart = await getCartByEmail(userEmail);
   const itemIndex = cart.findIndex(item => item.producto.id === productId);
 
   if (itemIndex !== -1) {
@@ -63,6 +60,6 @@ export function updateCartItemQuantity(productId: number, nuevaCantidad: number)
       cart[itemIndex].cantidad = nuevaCantidad;
       cart[itemIndex].subtotal = nuevaCantidad * cart[itemIndex].producto.precio;
     }
-    saveCart(cart);
+    saveCartByEmail(userEmail, cart);
   }
 }
