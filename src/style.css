@@ -1,80 +1,87 @@
 :root {
-  --card-bg: #ffffff;
-  --primary-color: #ff6b4a;      /* El naranja de los botones y logo */
+    --card-bg: #ffffff;
+    --primary-color: #ff6b4a;
+    /* El naranja de los botones y logo */
     --primary-hover: #e05638;
-    --secondary-color: #2b2d42;    /* Textos principales */
-    --bg-light: #f4f6f9;           /* Fondo gris claro de la app */
+    --secondary-color: #2b2d42;
+    /* Textos principales */
+    --bg-light: #f4f6f9;
+    /* Fondo gris claro de la app */
     --bg-white: #ffffff;
     --border-color: #e2e8f0;
     --text-muted: #718096;
-    --accent-green: #00bfa6;       /* Color de "Disponible" o "Confirmar" */
-    --accent-red: #d90429;         /* Botón Vaciar Carrito / Eliminar */
-    --accent-yellow: #ffb703;      /* Estado Pendiente */
+    --accent-green: #00bfa6;
+    /* Color de "Disponible" o "Confirmar" */
+    --accent-red: #d90429;
+    /* Botón Vaciar Carrito / Eliminar */
+    --accent-yellow: #ffb703;
+    /* Estado Pendiente */
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --radius: 8px;
 }
 
 body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
-  font-family: 'Inter', system-ui, sans-serif;
-  background-color: var(--bg-light);
-  color: var(--secondary-color);
-  justify-content: center;
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: var(--bg-light);
+    color: var(--secondary-color);
+    justify-content: center;
 }
 
 #app {
-  width: 100%;
-  max-width: 400px;
-  padding: 2rem;
-  text-align: center;
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem;
+    text-align: center;
 }
 
 /* Tarjetas y Contenedores */
-section, .card {
-  background: var(--card-bg);
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+section,
+.card {
+    background: var(--card-bg);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
 }
 
 h1 {
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-  color: var(--primary-color);
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: var(--primary-color);
 }
 
 /* Formularios */
 form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-  text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    text-align: left;
 }
 
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
 label {
-  font-weight: 600;
-  font-size: 0.9rem;
+    font-weight: 600;
+    font-size: 0.9rem;
 }
 
 input {
-  padding: 0.8rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
 }
 
 input:focus {
-  outline: none;
-  border-color: var(--primary-color);
+    outline: none;
+    border-color: var(--primary-color);
 }
 
 /* Botones */
@@ -92,30 +99,54 @@ input:focus {
     gap: 8px;
 }
 
-.btn-primary { background-color: var(--primary-color); color: white; }
-.btn-primary:hover { background-color: var(--primary-hover); }
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
 
-.btn-secondary { background-color: var(--border-color); color: var(--secondary-color); }
-.btn-secondary:hover { background-color: #cbd5e1; }
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
 
-.btn-danger { background-color: var(--accent-red); color: white; }
-.btn-danger:hover { background-color: #b30322; }
+.btn-secondary {
+    background-color: var(--border-color);
+    color: var(--secondary-color);
+}
 
-.btn-success { background-color: var(--accent-green); color: white; }
-.btn-success:hover { background-color: #00a38d; }
+.btn-secondary:hover {
+    background-color: #cbd5e1;
+}
+
+.btn-danger {
+    background-color: var(--accent-red);
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #b30322;
+}
+
+.btn-success {
+    background-color: var(--accent-green);
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #00a38d;
+}
 
 
 /* Enlaces */
 a {
-  color: var(--primary-color);
-  text-decoration: none;
-  font-size: 0.9rem;
-  margin-top: 1rem;
-  display: inline-block;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    display: inline-block;
 }
 
 a:hover {
-  text-decoration: underline;
+    text-decoration: underline;
 }
 
 /* Estilos langing page */
@@ -145,8 +176,15 @@ a:hover {
 
 /* Animación de entrada suave */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Estilos del encabezado y logo */
@@ -213,7 +251,7 @@ a:hover {
     font-size: 1rem;
     border-radius: var(--radius);
     justify-content: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
 .landing-footer {
@@ -227,54 +265,58 @@ a:hover {
 
 /*  Estilos Login / Registro  */
 
-.auth-body{
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-  font-family: 'Inter', system-ui, sans-serif;
-  background-color: var(--primary-color);
-  color: var(--secondary-color);
-  justify-content: center;
+.auth-body {
+    margin: 0;
+    display: flex;
+    place-items: center;
+    min-width: 320px;
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    justify-content: center;
 }
 
 
 .test-data {
-  display:block;
-  text-align:left;
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-.test-data:first-of-type{
-  font-weight: 600;
+    display: block;
+    text-align: left;
+    font-size: 0.8rem;
+    color: var(--text-muted);
 }
 
-.test-data + .test-data {
-  margin-top: 0.2rem;
+.test-data:first-of-type {
+    font-weight: 600;
 }
 
-.session-card p{
-  font-size:0.9rem;
+.test-data+.test-data {
+    margin-top: 0.2rem;
 }
 
-.session-card p a{
-  text-decoration: underline;
-  font-weight:600;
+.session-card p {
+    font-size: 0.9rem;
 }
-.back-to-home{
-  margin-bottom:2rem;
+
+.session-card p a {
+    text-decoration: underline;
+    font-weight: 600;
+}
+
+.back-to-home {
+    margin-bottom: 2rem;
 }
 
 #mensajesValidacion p {
-  margin: 2px 0;
-  font-size: 0.9em;
+    margin: 2px 0;
+    font-size: 0.9em;
 }
+
 .invalido {
-  color: #808080;
+    color: #808080;
 }
+
 .valido {
-  color: #52c41a; 
+    color: #52c41a;
 }
 
 /* --- Estructura base --- */
@@ -312,8 +354,9 @@ a:hover {
     font-weight: 500;
     margin-top: 0;
 }
-.user-name{
-    font-weight: bold; 
+
+.user-name {
+    font-weight: bold;
     color: var(--primary-color);
 }
 
@@ -333,10 +376,10 @@ a:hover {
 .main-content {
     flex: 1;
     padding: 30px 40px;
-    display:none
+    display: none
 }
 
-.main-content-block{
+.main-content-block {
     display: block;
 }
 
@@ -349,8 +392,8 @@ a:hover {
     letter-spacing: 0.5px;
 }
 
-.sidebar-title{
-  color:var(--primary-color);
+.sidebar-title {
+    color: var(--primary-color);
 }
 
 .sidebar-menu {
@@ -360,10 +403,11 @@ a:hover {
 .sidebar-menu li {
     margin-bottom: 8px;
 }
-.sidebar-divider{
-  border:0;
-  height:1px;
-  background-color: var(--text-muted)
+
+.sidebar-divider {
+    border: 0;
+    height: 1px;
+    background-color: var(--text-muted)
 }
 
 .sidebar-menu a {
@@ -375,14 +419,14 @@ a:hover {
     font-weight: 500;
 }
 
-.sidebar-menu li.active a, 
+.sidebar-menu li.active a,
 .sidebar-menu a:hover {
     background-color: #fff0ec;
     color: var(--primary-color);
 }
 
 /* Home Store */
-//TO DO Check styles
+/* TO DO Check styles */
 
 .store-controls {
     display: flex;
@@ -473,7 +517,8 @@ a:hover {
 .product-img {
     width: 100%;
     height: 200px;
-    object-fit: cover; /* Evita que la comida se deforme */
+    object-fit: cover;
+    /* Evita que la comida se deforme */
     background-color: var(--bg-light);
 }
 
@@ -481,7 +526,8 @@ a:hover {
     padding: 1.25rem;
     display: flex;
     flex-direction: column;
-    flex-grow: 1; /* Empuja el footer hacia abajo para que queden alineados */
+    flex-grow: 1;
+    /* Empuja el footer hacia abajo para que queden alineados */
 }
 
 .product-info h4 {
@@ -496,7 +542,8 @@ a:hover {
     color: var(--text-muted);
     margin: 0 0 1.25rem 0;
     line-height: 1.4;
-    flex-grow: 1; /* Si la descripción es corta, mantiene la tarjeta simétrica */
+    flex-grow: 1;
+    /* Si la descripción es corta, mantiene la tarjeta simétrica */
 }
 
 /* Fila de precio, stock y botón */
@@ -540,7 +587,8 @@ a:hover {
 /* Estado bloqueado para Admin */
 .product-info .btn-add-cart.disabled,
 .product-info .btn-add-cart[disabled] {
-    background-color: #cbd5e1; /* Gris suave neutro */
+    background-color: #cbd5e1;
+    /* Gris suave neutro */
     color: #64748b;
     cursor: not-allowed;
     opacity: 0.8;
@@ -579,14 +627,15 @@ a:hover {
 
 /* Mensaje cuando no hay productos */
 .no-products {
-    grid-column: 1 / -1; /* Ocupa todo el ancho disponible */
+    grid-column: 1 / -1;
+    /* Ocupa todo el ancho disponible */
     text-align: center;
     padding: 3rem;
     color: var(--text-muted);
     font-size: 1.05rem;
 }
 
-/* ESTILOS DETALLE PEDIDO */ 
+/* ESTILOS DETALLE PEDIDO */
 /*  TO DO Check styles */
 
 /* ==========================================
@@ -800,7 +849,8 @@ a:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Oscurece el fondo */
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Oscurece el fondo */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -821,11 +871,12 @@ a:hover {
     padding: 30px;
     border-radius: 12px;
     width: 100%;
-    max-width: 550px; 
+    max-width: 550px;
     max-height: 90vh;
-    overflow-y: auto;  /* Por si el contenido es largo */
+    overflow-y: auto;
+    /* Por si el contenido es largo */
     position: relative;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     transform: translateY(-20px);
     transition: transform 0.3s ease;
 }
@@ -876,7 +927,7 @@ a:hover {
 
 /* carrito */
 
-.cart-page-container {
+.page-container {
     max-width: 1200px;
     margin: 40px auto;
     padding: 0 20px;
@@ -1070,7 +1121,7 @@ a:hover {
 }
 
 /* Estado Vacío */
-.empty-cart-container {
+.empty-container {
     text-align: center;
     padding: 60px 20px;
     background: var(--bg-white);
@@ -1078,7 +1129,7 @@ a:hover {
     box-shadow: var(--shadow);
 }
 
-.empty-cart-container p {
+.empty-container p {
     color: var(--text-muted);
     font-size: 1.2rem;
     margin-bottom: 20px;
@@ -1103,18 +1154,41 @@ a:hover {
     box-shadow: var(--shadow);
 }
 
-.stat-info{
-  flex-grow: 1;
+.stat-info {
+    flex-grow: 1;
 }
 
-.card-purple { background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); }
-.card-pink   { background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); }
-.card-blue   { background: linear-gradient(135deg, #02aab0 0%, #00cdac 100%); }
-.card-green  { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+.card-purple {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+}
 
-.stat-info .icon { font-size: 1.5rem; }
-.stat-info h3 { font-size: 1.1rem; margin-top: 5px; font-weight: 500; }
-.stat-info .counter { font-size: 2rem; font-weight: bold; margin-top: 2px; }
+.card-pink {
+    background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+}
+
+.card-blue {
+    background: linear-gradient(135deg, #02aab0 0%, #00cdac 100%);
+}
+
+.card-green {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.stat-info .icon {
+    font-size: 1.5rem;
+}
+
+.stat-info h3 {
+    font-size: 1.1rem;
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+.stat-info .counter {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-top: 2px;
+}
 
 .btn-manage {
     background: rgba(255, 255, 255, 0.2);
@@ -1126,7 +1200,10 @@ a:hover {
     align-self: flex-start;
     font-weight: 600;
 }
-.btn-manage:hover { background: rgba(255, 255, 255, 0.3); }
+
+.btn-manage:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
 
 .summary-panel {
     background-color: var(--bg-white);
@@ -1136,3 +1213,104 @@ a:hover {
     box-shadow: var(--shadow);
 }
 
+/* PEDIDOS */
+
+/* Contenedor General */
+.orders-container {
+    padding: 20px 0;
+}
+
+/* Tarjeta Base */
+.order-card {
+    background: #ffffff;
+    margin-block: 2rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.order-card:hover {
+    transform: translateY(-4px);
+}
+
+/* Encabezados y Badges */
+
+.orders-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+
+}
+
+.order-header,
+.order-body {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.order-footer {
+    display: flex;
+    justify-content: space-between;
+}
+
+
+.order-actions{
+    display: flex;
+}
+
+.status-badge {
+    padding: 5px 15px;
+    border-radius: 15px;
+    font-size: .9rem;
+    font-weight: bold;
+}
+
+.order-id,
+.order-total {
+    font-weight: bold;
+}
+
+.order-total {
+    font-size: 1.3rem;
+    color: var(--primary-color);
+}
+
+.status-pendiente {
+    background-color: #ffeaa7;
+    color: #d63031;
+}
+
+.status-confirmado {
+    background-color: #81ecec;
+    color: #00b894;
+}
+
+.status-en_preparacion {
+    background-color: #74b9ff;
+    color: #0984e3;
+}
+
+.status-entregado {
+    background-color: #55efc4;
+    color: #00b894;
+}
+
+/* select del admin */
+.status-selector {
+    padding: 6px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    width: 100%;
+    margin-top: 5px;
+}

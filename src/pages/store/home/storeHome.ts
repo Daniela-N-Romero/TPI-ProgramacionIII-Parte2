@@ -1,8 +1,8 @@
 import { obtenerEstadoCliente, navigate, validarAccesoRuta } from "../../../../src/utils/guards/guards";
 import { actualizarBadgeNavbar } from "../../../utils/layout";
-import { addToCart } from "../../../utils/localStorage/cartStorage";
-import { getProducts } from "../../../utils/localStorage/productStorage";
-import { getActiveUser } from "../../../utils/localStorage/userStorage";
+import { addToCart } from "../../../utils/storage/cartStorage";
+import { getProducts } from "../../../utils/storage/productStorage";
+import { getActiveUser } from "../../../utils/storage/userStorage";
 
 // VARIABLES DE ESTADO LOCAL (Para combinar filtros y ordenamientos en tiempo real)
 let categoriaSeleccionadaId: number | 'todas' = 'todas';

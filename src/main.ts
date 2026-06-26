@@ -1,4 +1,4 @@
-import { getActiveUser } from "./utils/localStorage/userStorage.ts"
+import { getActiveUser } from "./utils/storage/userStorage.ts"
 import { rolRedirect  } from "./utils/auth/auth.ts";
 import {navigate} from "./utils/guards/guards.ts"
 

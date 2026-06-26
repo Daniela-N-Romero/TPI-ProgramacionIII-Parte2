@@ -1,8 +1,8 @@
 import { ModalService } from "../../../utils/modal";
 import type { FormaPago, IOrder } from "../../../types/IOrder";
-import { clearCart, removeFromCart, getCartTotal, getCartQuantity, updateCartItemQuantity, getCartByEmail} from "../../../utils/localStorage/cartStorage";
-import { getActiveUser } from "../../../utils/localStorage/userStorage";
-import { registrarNuevoPedidoDelCliente } from "../../../utils/localStorage/orderStorage";
+import { clearCart, removeFromCart, getCartTotal, getCartQuantity, updateCartItemQuantity, getCartByEmail} from "../../../utils/storage/cartStorage";
+import { getActiveUser } from "../../../utils/storage/userStorage";
+import { registrarNuevoPedidoDelCliente } from "../../../utils/storage/orderStorage";
 
 // Envío (Documentado en README)
 const COSTO_ENVIO = 500;
@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const main = document.querySelector(".main-content");
     if (user.rol === "USUARIO") {
         main?.classList.add("main-content-block")
+        console.log(main)
         renderizarCarrito(user.mail);
     }
 });
@@ -24,8 +25,8 @@ const renderizarCarrito = async (email: string): Promise<void> => {
     const cart = await getCartByEmail(email);
 
     if (cart.length === 0) {
-        container.innerHTML = ` º
-            <div class="empty-cart-container">
+        container.innerHTML = `
+            <div class="empty-container">
                 <p>Tu carrito de compras está vacío.</p>
                 <button class="btn btn-primary" onclick="window.location.href='/tienda'">Ir a la Tienda</button>
             </div>

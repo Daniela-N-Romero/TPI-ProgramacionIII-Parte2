@@ -1,7 +1,7 @@
 import { validarAccesoRuta, obtenerEstadoCliente, navigate } from "../../../../src/utils/guards/guards";
-import { getProduct } from "../../../../src/utils/localStorage/productStorage";
-import { addToCart } from "../../../../src/utils/localStorage/cartStorage";
-import { getActiveUser } from "../../../utils/localStorage/userStorage";
+import { getProduct } from "../../../utils/storage/productStorage";
+import { addToCart } from "../../../utils/storage/cartStorage";
+import { getActiveUser } from "../../../utils/storage/userStorage";
 import { actualizarBadgeNavbar } from "../../../utils/layout";
 
 // Ejecutamos la lógica principal si la ruta está permitida

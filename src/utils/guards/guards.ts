@@ -1,5 +1,5 @@
 // src/auth/guards.ts
-import { getActiveUser } from '../localStorage/userStorage'; 
+import { getActiveUser } from '../storage/userStorage'; 
 
 type Rol = "ADMIN" | "USUARIO";
 type TipoUsuario = Rol | "INVITADO";

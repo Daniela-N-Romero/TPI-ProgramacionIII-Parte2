@@ -1,6 +1,6 @@
 import type { IUserStorage } from '../../../types/IUser';
 import { rolRedirect, validatePassword } from '../../../utils/auth/auth';
-import { getUsers, loginUser, saveUser } from '../../../utils/localStorage/userStorage'
+import { getUsers, loginUser, saveUser } from '../../../utils/storage/userStorage'
 
 const form = document.getElementById("registro-form") as HTMLFormElement;
 const inputName = document.getElementById("name") as HTMLInputElement;

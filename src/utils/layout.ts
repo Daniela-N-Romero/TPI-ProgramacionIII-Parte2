@@ -1,8 +1,8 @@
-import { getCategories } from "./localStorage/categoryStorage";
-import { getCartByEmail } from "./localStorage/cartStorage";
+import { getCategories } from "./storage/categoryStorage";
+import { getCartByEmail } from "./storage/cartStorage";
 import { logout } from "./auth/auth";
 import { obtenerEstadoCliente } from "./guards/guards";
-import { getActiveUser } from "./localStorage/userStorage";
+import { getActiveUser } from "./storage/userStorage";
 
 const user = obtenerEstadoCliente();
 
