@@ -3,6 +3,7 @@ import { getProduct } from "../../../utils/storage/productStorage";
 import { addToCart } from "../../../utils/storage/cartStorage";
 import { getActiveUser } from "../../../utils/storage/userStorage";
 import { actualizarBadgeNavbar } from "../../../utils/layout";
+import { AlertService } from "../../../utils/modals/alert";
 
 // Ejecutamos la lógica principal si la ruta está permitida
 
@@ -129,14 +130,10 @@ function configurarComponentesDetalle(maxStock: number, isInvitado: boolean): vo
 
         if (producto) {
             const user = getActiveUser();
-            addToCart(producto, cantidadAAgregar, user.mail);
+            await addToCart(producto, cantidadAAgregar, user.mail);
             actualizarBadgeNavbar();
             
-            alert(`¡Se agregaron ${cantidadAAgregar} x "${producto.nombre}" al carrito con éxito!`);
+            AlertService.success(`${producto.nombre} al carrito con éxito!`, `¡Se agregaron ${cantidadAAgregar} x ${producto.nombre}`)
         }
     });
 }
-
-
-
-//TO DO cAMBIAR ALERT

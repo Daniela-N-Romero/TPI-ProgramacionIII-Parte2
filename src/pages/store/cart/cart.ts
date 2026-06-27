@@ -3,6 +3,7 @@ import type { FormaPago, IOrder } from "../../../types/IOrder";
 import { clearCart, removeFromCart, getCartTotal, getCartQuantity, updateCartItemQuantity, getCartByEmail} from "../../../utils/storage/cartStorage";
 import { getActiveUser } from "../../../utils/storage/userStorage";
 import { registrarNuevoPedidoDelCliente } from "../../../utils/storage/orderStorage";
+import { AlertService } from "../../../utils/modals/alert";
 
 // Envío (Documentado en README)
 const COSTO_ENVIO = 500;
@@ -85,8 +86,9 @@ const vincularEventosAcciones = (email: string): void => {
         if (target.classList.contains("btn-plus")) {
             //  Validación respetando el stock disponible 
             if (item.cantidad >= item.producto.stock) {
-                //TO DO : cambiar alert.
-                alert(`Lo sentimos, no hay más stock disponible (${item.producto.stock} unidades máx).`);
+                 AlertService.warning(
+                                  "Error", 
+                                  `Lo sentimos, no hay más stock disponible (${item.producto.stock} unidades máx).`);
                 return;
             }
             //sumamos 1 por cada click
@@ -198,7 +200,10 @@ const procesarConfirmacionPedido = async (formaPago: FormaPago, total: number): 
     actualizarBadgeNavbar(await getCartQuantity(usuarioLogueado.mail));
 
     ModalService.close();
-    //TO DO : Cambiar alert
-    alert("¡Pedido realizado con éxito! Redirigiendo a tus pedidos...");
-    window.location.href = "/pedidos";
+    AlertService.success(
+                  "¡Pedido realizado con éxito!", 
+                  "Redirigiendo a tus pedidos..."
+                );
+        setTimeout(() => window.location.href = "/pedidos", 1500)
+    ;
 };

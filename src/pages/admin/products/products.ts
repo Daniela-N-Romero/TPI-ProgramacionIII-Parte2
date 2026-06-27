@@ -178,17 +178,26 @@ const abrirModalProducto = (producto?: IProduct) => {
 
       // Criterio 4: Validaciones explícitas de negocio
       if (precio <= 0) {
-        alert("El precio debe ser un número mayor a 0.");
+        AlertService.warning(
+        "Error", 
+        "El precio debe ser un número mayor a 0."
+      );
         return;
       }
       if (stock < 0) {
-        alert("El stock no puede ser un número negativo.");
+         AlertService.warning(
+        "Error", 
+        "El stock no puede ser un número negativo."
+      );
         return;
       }
 
       const categoriaSeleccionada = categoriasDisponibles.find(c => c.id === categoriaId);
       if (!categoriaSeleccionada) {
-        alert("La categoría seleccionada no es válida.");
+          AlertService.warning(
+        "Error", 
+        "Ingresar una categoria válida."
+      );
         return;
       }
 

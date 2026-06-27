@@ -4,6 +4,7 @@ import { ModalService } from '../../../utils/modals/modal';
 import { getActiveUser } from '../../../utils/storage/userStorage';
 import { navigate } from '../../../utils/guards/guards';
 import { filtrarPedidosPorEstado, formatearFechaParaPantalla, ordenarPedidosPorFechaDesc } from '../../../utils/orders/orders';
+import { AlertService } from '../../../utils/modals/alert';
 
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -13,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (user?.rol === "ADMIN") {
     main?.classList.add("main-content-block")
     renderGestionPedidos();
-  }else{
+  } else {
     navigate("./tienda")
   }
 });
@@ -76,7 +77,8 @@ export const renderGestionPedidos = async () => {
         <p><strong>Pago:</strong> ${pedido.formaPago}</p>
         <p class="order-total">Total: <strong>$${pedido.total}</strong></p>
       </div>
-      <div class="order-actions">
+      <div class="order-footer">
+        <p class="order-total-products">📦 ${pedido.detalles.reduce((acc, item) => acc + item.cantidad, 0)} producto(s)</p>
         <label for="status-${pedido.id}">Estado: <span class="status-badge status-${pedido.estado.toLowerCase()}">${pedido.estado}</span></label>
       </div>
     `;
@@ -89,7 +91,11 @@ export const renderGestionPedidos = async () => {
         // Actualizamos el objeto pedido localmente y lo guardamos
         pedido.estado = nuevoEstado;
         await saveOrUpdateOrder(pedido);
-        //TO DO  alert?
+        AlertService.success(
+              "Éxito",
+              `Modificaste el estado del pedido a ${nuevoEstado}`
+        );
+
       });
 
       card?.addEventListener('click', () => {
@@ -192,7 +198,8 @@ export const abrirModalDetallePedido = (pedido: IOrder) => {
         await saveOrUpdateOrder(pedido);
         renderGestionPedidos();
         
-        alert(`Pedido #${pedido.id} actualizado a ${nuevoEstado} con éxito.`);
+        AlertService.success(`Actualización realizada`, `Pedido #${pedido.id} actualizado a ${nuevoEstado} con éxito.`)
+      
         
         // Opcional: Cerrás el modal automáticamente tras guardar
         ModalService.close();

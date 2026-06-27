@@ -2,7 +2,7 @@ import { getOrdersByEmail } from '../../../utils/storage/orderStorage';
 import { getActiveUser } from '../../../utils/storage/userStorage';
 import { ModalService } from '../../../utils/modals/modal';
 import type { IUserDTO } from '../../../types/IUser';
-import { filtrarPedidosPorEstado, ordenarPedidosPorFechaDesc } from '../../../utils/orders/orders';
+import { filtrarPedidosPorEstado, ordenarPedidosPorFechaDesc, formatearFechaParaPantalla } from '../../../utils/orders/orders';
 import type { IOrder } from '../../../types/IOrder';
 
  
@@ -93,7 +93,7 @@ export const renderMisPedidos = async (user: IUserDTO) => {
       <div class="order-header">
         <div>
           <p class="order-id">Pedido ORD#${pedido.id}</p>
-          <p class="order-date">${pedido.fecha}</p>
+          <p class="order-date">${formatearFechaParaPantalla(pedido.fecha)}</p>
         </div>
           <span class="status-badge status-${pedido.estado.toLowerCase()}">${pedido.estado}</span>
       </div>

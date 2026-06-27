@@ -1,6 +1,7 @@
 import type { IUserStorage } from '../../../types/IUser';
 import { rolRedirect, validatePassword } from '../../../utils/auth/auth';
-import { getUsers, loginUser, saveUser } from '../../../utils/storage/userStorage'
+import { AlertService } from '../../../utils/modals/alert';
+import { getUsers, loginUser, saveOrUpdateUser } from '../../../utils/storage/userStorage'
 
 const form = document.getElementById("registro-form") as HTMLFormElement;
 const inputName = document.getElementById("name") as HTMLInputElement;
@@ -14,27 +15,36 @@ const pletra = document.getElementById('letra') as HTMLElement;
 const pNum = document.getElementById('numero') as HTMLElement;
 const pIgualdad = document.getElementById('igualdad') as HTMLElement;
 
-form?.addEventListener("submit", (e: SubmitEvent) => {
+form?.addEventListener("submit", async (e: SubmitEvent) => {
     e.preventDefault();
     const valueEmail = inputEmail.value;
     const valuePassword = inputPassword.value;
     const valuePasswordConfirm = inputPasswordConfirm.value;
     const valueName = inputName.value;
     const valueApellido = inputApellido.value;
-    const users = getUsers();
+    const users = await getUsers();
 
     if (!valueName || !valueApellido) {
-        alert("Por favor, complete su nombre y apellido.");
+        AlertService.warning(
+                  "Error", 
+                  "Por favor, complete su nombre y apellido."
+                );
         return;
     }
 
     if (!validatePassword(valuePassword) || !validatePassword(valuePasswordConfirm)) {
-        alert("La contraseña no cumple con los requisitos.");
+        AlertService.warning(
+                  "Error", 
+                  "La contraseña no cumple con los requisitos."
+                );
         return;
     }
 
     if (valuePassword !== valuePasswordConfirm) {
-        alert("Las contraseñas no coinciden.")
+        AlertService.warning(
+                  "Error", 
+                  "Las contraseñas no coinciden."
+                );
         return
     }
 
@@ -46,19 +56,23 @@ form?.addEventListener("submit", (e: SubmitEvent) => {
         apellido: "",
         celular: "",
         password: valuePassword,
-        id: getUsers().length+1
+        id: users.length + 1
     };
 
     const existeUsuario = users.some((user) => user.mail === valueEmail);
     if (existeUsuario) {
-        alert("Email no disponible.")
+        AlertService.warning(
+                  "Error", 
+                  "Email no disponible.")
         return
     }
 
-    saveUser(newUser)
+    saveOrUpdateUser(newUser)
     const { password, ...userToLog } = newUser;
     loginUser({...userToLog, loggedIn:true})
-    alert("Usuario Registrado. Redirigiendo al home...")
+     AlertService.success(
+                  "Éxito", 
+                  "Usuario Registrado. Redirigiendo al home...")
     setTimeout(() => rolRedirect(newUser.rol, "/adminPanel", "/tienda"), 1500)
 
 }

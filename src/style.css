@@ -1213,6 +1213,89 @@ a:hover {
     box-shadow: var(--shadow);
 }
 
+.summary-panel .summary-title {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    color: var(--text-dark, #2d3748);
+}
+
+/* El Grid interno para las mini-tarjetas */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    width: 100%;
+}
+
+/* Tarjeta contenedora interna independiente */
+.summary-card {
+    background-color: #f8f9fa;
+    padding: 18px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    box-shadow: none; /* Evitamos heredar sombras pesadas */
+    border: 1px solid #edf2f7;
+}
+
+/* Bordes laterales limpios para diferenciar áreas sin usar gradientes oscuros */
+.summary-card.border-blue {
+    border-left: 4px solid #3182ce;
+}
+
+.summary-card.border-orange {
+    border-left: 4px solid #dd6b20;
+}
+
+.summary-card.border-green {
+    border-left: 4px solid #2ed573;
+}
+
+/* Elementos internos */
+.summary-card .card-sub-title {
+    margin: 0 0 12px 0;
+    color: #4a5568;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-bottom: 1px solid #edf2f7;
+    padding-bottom: 6px;
+}
+
+.summary-card .summary-item {
+    margin: 6px 0;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #2d3748;
+}
+
+.summary-card .summary-count {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #2d3748;
+}
+
+.summary-card .summary-count-highlight {
+    color: #2ed573;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.summary-card .summary-footer {
+    margin-top: auto; /* Empuja el footer al fondo si una tarjeta es más alta */
+    padding-top: 10px;
+    font-size: 0.8rem;
+    color: var(--text-muted, #718096);
+    border-top: 1px dashed #edf2f7;
+}
+
+/* Clases utilitarias seguras */
+.text-success-muted { color: #2ed573; font-weight: 600; }
+.text-danger-muted { color: #e53e3e; font-weight: 600; }
+
 /* PEDIDOS */
 
 /* Contenedor General */
@@ -1262,6 +1345,7 @@ a:hover {
 .order-footer {
     display: flex;
     justify-content: space-between;
+    align-items: center;
 }
 
 
@@ -1284,6 +1368,7 @@ a:hover {
 .order-total {
     font-size: 1.3rem;
     color: var(--primary-color);
+    text-align: end;
 }
 
 .status-pendiente {
@@ -1361,3 +1446,6 @@ a:hover {
   font-size: 0.85rem;
   font-weight: 600;
 }
+
+/* admin resumen */
+

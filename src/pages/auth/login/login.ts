@@ -1,5 +1,6 @@
 import type { Rol, IUserDTO } from "../../../types/IUser";
 import { findUserByEmail, rolRedirect, validateEmail, validatePassword } from "../../../utils/auth/auth";
+import { AlertService } from "../../../utils/modals/alert";
 import { loginUser } from "../../../utils/storage/userStorage";
 
 const form = document.getElementById("form") as HTMLFormElement;
@@ -15,17 +16,26 @@ form.addEventListener("submit", async (e: SubmitEvent) => {
     console.log(valueEmail, valuePassword)
 
  if(!validateEmail(valueEmail)){
-    alert("Por favor, ingrese un correo electrónico válido.");
+    AlertService.warning(
+          "Error en el correo electrónico.", 
+          "Por favor, ingrese un correo electrónico válido."
+        );
     return;
  }
  if(!validatePassword(valuePassword)){
-    alert("La contraseña no cumple con los requisitos.");
+    AlertService.warning(
+          "Error en el correo electrónico.", 
+          "La contraseña no cumple con los requisitos."
+        );
     return;
  }
   const usuarioExistente = await findUserByEmail(valueEmail);
   
   if (!usuarioExistente) {
-      alert("El email ingresado no existe.")
+        AlertService.warning(
+          "Error en el correo electrónico.", 
+          "El email ingresado no existe."
+        );
       inputPassword.value = "";
       return; 
   }
@@ -44,7 +54,10 @@ form.addEventListener("submit", async (e: SubmitEvent) => {
       loginUser(user);
       rolRedirect(user.rol, "/adminPanel", "/tienda");
   } else {
-      alert("Contraseña incorrecta. Por favor, intenta de nuevo.");
+    AlertService.warning(
+          "Error", 
+          "Contraseña incorrecta. Por favor, intenta de nuevo."
+        );
       inputPassword.value = "";
   }
 });

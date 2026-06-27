@@ -37,5 +37,19 @@ export const AlertService = {
     ModalService.open(html, () => {
       document.getElementById('btn-success-close')?.addEventListener('click', () => ModalService.close());
     });
+  },
+
+  warning: (titulo: string, mensaje: string) => {
+    const html = `
+      <div class="warning-modal-content" style="text-align: center; padding: 10px;">
+        <h3 style="margin-top: 0; color: #dd6b20;">⚠️ ${titulo}</h3>
+        <p style="margin: 15px 0; color: var(--text-muted);">${mensaje}</p>
+        <button id="btn-warning-close" class="btn" style="margin-top: 15px; background: #dd6b20; border: none; color: white; padding: 8px 20px; border-radius: 6px; cursor: pointer; font-weight: 600;">Entendido</button>
+      </div>
+    `;
+
+    ModalService.open(html, () => {
+      document.getElementById('btn-warning-close')?.addEventListener('click', () => ModalService.close());
+    });
   }
 };

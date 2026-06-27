@@ -110,7 +110,7 @@ tbody.querySelectorAll('.btn-delete-cat').forEach(btn => {
     const tieneProductosAsociados = productos.some(prod => prod.categoria && prod.categoria.id === id);
 
     if (tieneProductosAsociados) {
-      AlertService.success(
+      AlertService.warning(
         "Acción Bloqueada", 
         "No se puede eliminar esta categoría porque tiene productos asociados. Por favor, edita o elimina primero esos productos."
       );
