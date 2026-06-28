@@ -30,7 +30,6 @@ export const validarAccesoRuta = () => {
 
   if (!tieneAcceso) {
     // Redirecciones 
-    console.log(rolActual)
     if (rolActual === "INVITADO") {
       navigate("/login");
     } else if (rolActual === "ADMIN") {

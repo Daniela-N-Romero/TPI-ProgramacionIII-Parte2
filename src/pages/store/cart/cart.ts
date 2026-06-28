@@ -222,9 +222,7 @@ const actualizarStockProductos = async (pedido: IOrder) => {
 
             if (producto) {
 
-                console.log(`Producto: ${producto.nombre} | Stock actual: ${producto.stock}`);
                 producto.stock -= detalle.cantidad;
-                console.log("stock nuevo: ", producto.stock)
                 await saveOrUpdateProduct(producto);
             }
         } catch (error) {

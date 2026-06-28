@@ -139,9 +139,8 @@ const configurarClickDetalle = (): void => {
   tarjetas.forEach(tarjeta => {
     tarjeta.addEventListener("click", (e) => {
       const id = (e.currentTarget as HTMLDivElement).getAttribute("data-id");
-      console.log(`/product?id=${id}`)
       if (id) {
-        navigate(`/product?id=${id}`);
+        navigate(`/producto?id=${id}`);
       }
     });
   });

@@ -35,7 +35,7 @@ export default defineConfig({
                     if (req.url === "/tienda") {req.url = "/src/pages/store/home/storeHome.html"; }
                     if (req.url === "/carrito") {req.url = "/src/pages/store/cart/cart.html"; }
                     if (req.url === "/pedidos") {req.url = "/src/pages/client/orders/clientOrders.html";}    
-                    if (req.url?.startsWith("/producto")) { req.url = "/src/pages/store/productDetail/productDetail.html";}
+                    if (req.url?.startsWith("/producto?id")) { req.url = "/src/pages/store/productDetail/productDetail.html";}
                     next();
                 });
             },

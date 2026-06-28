@@ -74,7 +74,6 @@ export async function getCartQuantity(userEmail: string): Promise<number> {
 export async function updateCartItemQuantity(productId: number, nuevaCantidad: number, userEmail: string): Promise<void> {
   let cart = await getCartByEmail(userEmail);
   const itemIndex = cart.findIndex(item => item.producto.id === productId);
-  // console.log(cart[itemIndex].producto.id, " es el id del producto en el carrito. Y el indice en el carrito es ", itemIndex)
 
 
   if (itemIndex !== -1) {

@@ -13,8 +13,6 @@ form.addEventListener("submit", async (e: SubmitEvent) => {
   const valueEmail = inputEmail.value;
   const valuePassword = inputPassword.value;
 
-    console.log(valueEmail, valuePassword)
-
  if(!validateEmail(valueEmail)){
     AlertService.warning(
           "Error en el correo electrónico.", 
