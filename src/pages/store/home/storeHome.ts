@@ -1,16 +1,19 @@
 import { obtenerEstadoCliente, navigate, validarAccesoRuta } from "../../../../src/utils/guards/guards";
+import type { IProduct } from "../../../types/IProduct";
 import { actualizarBadgeNavbar } from "../../../utils/layout";
 import { addToCart } from "../../../utils/storage/cartStorage";
 import { getProducts } from "../../../utils/storage/productStorage";
 import { getActiveUser } from "../../../utils/storage/userStorage";
 
+
+//TO DO: revisar comentarios
 // VARIABLES DE ESTADO LOCAL (Para combinar filtros y ordenamientos en tiempo real)
 let categoriaSeleccionadaId: number | 'todas' = 'todas';
 let busquedaTexto: string = "";
 let ordenSeleccionado: string = "none";
 
 // Funciones de la tienda
-const filtrarPorCategoria = (): void => {
+const configurarFiltroCategorias = (): void => {
 
   const linksCategoria = document.querySelectorAll('#app-sidebar .sidebar-menu a[data-categoria-id]');
 
@@ -27,153 +30,159 @@ const filtrarPorCategoria = (): void => {
       linksCategoria.forEach(l => l.parentElement?.classList.remove('active'));
       target.parentElement?.classList.add('active');
 
-      // 
-      const categoriaId = categoriaIdRaw === 'todas' ? 'todas' : Number(categoriaIdRaw);
-
-      renderSegunCategoria(categoriaId);
+      // Actualizar estado de categoría
+      if (categoriaIdRaw === 'todas') {
+        categoriaSeleccionadaId = 'todas';
+      } else {
+        categoriaSeleccionadaId = parseInt(categoriaIdRaw);
+      }
+      renderSegunCategoria();
     });
   });
 };
 
 
-const renderSegunCategoria = async (categoriaId: number | 'todas' = 'todas'): Promise<void> => {
-  const productsContainer = document.getElementById('products-container');
+const renderSegunCategoria = async (): Promise<void> => {
+  const productsContainer = document.getElementById("products-container");
   if (!productsContainer) return;
-  const todosLosProductos = await getProducts();
 
-  let productosFiltrados = todosLosProductos.filter(producto => {
-    const perteneceACategoria = categoriaId === 'todas' || producto.categoria.id === categoriaId;
-    return perteneceACategoria && producto.disponible;
-  });
+  // Traer los productos frescos desde memoria
+  let productos: IProduct[] = await getProducts();
+  productos = productos.filter(p => p.disponible === true);
 
+  // A) FILTRADO POR CATEGORÍA
+  if (categoriaSeleccionadaId !== 'todas') {
+    productos = productos.filter(p => p.categoria && p.categoria.id === categoriaSeleccionadaId);
+  }
+
+  // B) FILTRADO POR BÚSQUEDA EN TIEMPO REAL (Filtra por nombre sin importar mayúsculas/minúsculas)
   if (busquedaTexto.trim() !== "") {
-    productosFiltrados = productosFiltrados.filter(producto =>
-      producto.nombre.toLowerCase().includes(busquedaTexto.toLowerCase())
-    );
+    const texto = busquedaTexto.toLowerCase().trim();
+    productos = productos.filter(p => p.nombre.toLowerCase().includes(texto));
   }
 
-  // Ordenamiento del array
-  if (ordenSeleccionado === "az") {
-    productosFiltrados.sort((a, b) => a.nombre.localeCompare(b.nombre));
-  } else if (ordenSeleccionado === "za") {
-    productosFiltrados.sort((a, b) => b.nombre.localeCompare(a.nombre));
-  } else if (ordenSeleccionado === "price-asc") {
-    productosFiltrados.sort((a, b) => a.precio - b.precio);
-  } else if (ordenSeleccionado === "price-desc") {
-    productosFiltrados.sort((a, b) => b.precio - a.precio);
+  // C) ORDENAMIENTO (Mutación controlada en el array filtrado)
+  if (ordenSeleccionado !== "none") {
+    switch (ordenSeleccionado) {
+      case "az": productos.sort((a, b) => a.nombre.localeCompare(b.nombre)); break;
+      case "za": productos.sort((a, b) => b.nombre.localeCompare(a.nombre)); break;
+      case "price-asc": productos.sort((a, b) => a.precio - b.precio); break;
+      case "price-desc": productos.sort((a, b) => b.precio - a.precio); break;
+    }
   }
 
-  productsContainer.innerHTML = '';
-  if (productosFiltrados.length === 0) {
-    productsContainer.innerHTML = `<p class="no-products">No hay productos disponibles en esta categoría por el momento.</p>`;
+  // D) RENDERIZADO DEL HTML DE PRODUCTOS
+  if (productos.length === 0) {
+    productsContainer.innerHTML = `
+      <div class="no-products-message" style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted);">
+        <p style="font-size: 1.2rem;">No se encontraron productos disponibles.</p>
+      </div>
+    `;
     return;
   }
 
-  const { isAdmin } = obtenerEstadoCliente();
+  productsContainer.innerHTML = productos.map(prod => {
+    // Validar Requisito: Botón Agregar al Carrito no disponible si stock = 0 o si no está disponible
+    const sinStock = prod.stock <= 0;
+    
+    return `
+      <div data-id="${prod.id}" style="cursor: pointer;" class="product-card ${!prod.disponible ? 'product-disabled' : ''}" >
+        <div class="product-image-container">
+          <img src="${prod.imagen || 'https://placehold.co/300'}" alt="${prod.nombre}" class="product-img">
+        </div>
+        <div class="product-info">
+          <h3 class="product-title">${prod.nombre}</h3>
+          <p class="product-description">${prod.descripcion}</p>
+          <div class="product-meta">
+            <span class="product-price">$${prod.precio.toLocaleString('es-AR')}</span>
 
-  productosFiltrados.forEach(producto => {
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.id = `${producto.id}`;
-    card.innerHTML = `
-            <img src="${producto.imagen}" alt="${producto.nombre}" class="product-img">
-            <div class="product-info">
-                <h4>${producto.nombre}</h4>
-                <p>${producto.descripcion}</p>
-                <span class="product-price">$${producto.precio}</span>
-                <span class="product-stock">Stock: ${producto.stock}</span>
-                <button class="btn btn-primary btn-add-cart" data-id="${producto.id}" ${isAdmin ? 'disabled' : ''}>Agregar 🛒</button>
-            </div>
-        `;
-    productsContainer.appendChild(card);
-  });
-  configurarBotonesCarrito(productsContainer);
+            ${sinStock ? '<span class="badge-sin-stock">Sin stock.</span>' : `<span class="product-stock-text">Disponibles: ${prod.stock} u.</span>`}
+          </div>
+          <button class="btn btn-add-cart" data-id="${prod.id}" ${sinStock ? 'disabled style="background: #cbd5e1; cursor: not-allowed;"' : ''}>
+            ${sinStock ? 'Agotado' : '🛒 Agregar'}
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  configurarBotonesCarrito();
+  configurarClickDetalle();
 };
 
-const configurarBotonesCarrito = (container: HTMLElement): void => {
+const configurarBotonesCarrito = (): void => {
 
-  // Removemos cualquier listener previo para evitar que se dupliquen los eventos
-  container.replaceWith(container.cloneNode(true));
+ const btnsAgregar = document.querySelectorAll(".btn-add-cart");
+  const usuarioActivo = getActiveUser();
 
-  // Volvemos a capturar el contenedor limpio
-  const cleanContainer = document.getElementById('products-container')!;
+  btnsAgregar.forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      // Verificar permisos con tu guarda pedagógica
+      if (!verificarPermiso(e)) return;
 
-  // Escuchamos los clics en todo el contenedor de productos
-  cleanContainer.addEventListener('click', async (e) => {
-    const target = e.target as HTMLElement;
-    if (target && target.classList.contains('btn-add-cart')) {
-      const productoId = Number(target.dataset.id); //capturamos el id del producto a agregar
-      if (!productoId) return;
+      const id = parseInt((e.currentTarget as HTMLButtonElement).getAttribute('data-id')!);
+      const productos = await getProducts();
+      const productoSeleccionado = productos.find(p => p.id === id);
 
-      if (verificarPermiso(e)) {
-
-        try {
-          const productos = await getProducts();
-          const productoSeleccionado = productos.find(p => p.id === productoId);
-
-          if (!productoSeleccionado) {
-            alert("No se pudo encontrar el producto.");
-            return;
-          }
-
-          const user = getActiveUser();
-          await addToCart(productoSeleccionado, 1, user.mail );
-          await actualizarBadgeNavbar();
-
-        } catch (error) {
-          console.error("Error al añadir al carrito:", error);
-        }
-        return //para no ser redirigido al sitio del detalle de producto
+      if (productoSeleccionado && usuarioActivo?.mail) {
+        // Añadir al storage del carrito por email
+        await addToCart(productoSeleccionado, 1, usuarioActivo.mail);
+        // Actualizar el numerito del carrito en el navbar
+        await actualizarBadgeNavbar();
       }
-    }
-    const card = target.closest(".product-card") as HTMLElement;
-    if (card) {
-      const productoId = card.id;
-      navigate(`/producto?id=${productoId}`);
-    }
+    });
   });
 };
 
-const verificarPermiso = (e: Event): boolean => { //si tiene permiso a agregar productos
+const configurarClickDetalle = (): void => {
+  const tarjetas = document.querySelectorAll(".product-card");
+  
+  tarjetas.forEach(tarjeta => {
+    tarjeta.addEventListener("click", (e) => {
+      const id = (e.currentTarget as HTMLDivElement).getAttribute("data-id");
+      console.log(`/product?id=${id}`)
+      if (id) {
+        navigate(`/product?id=${id}`);
+      }
+    });
+  });
+};
+
+const verificarPermiso = (e: Event): boolean => {
   const { isInvitado, isAdmin } = obtenerEstadoCliente();
-  const btnsAgregar = document.querySelectorAll(".btn-add-cart");
-
-  if (btnsAgregar) {
-    if (isAdmin) {
-      return false;
-    } else if (isInvitado) {
-      e.stopImmediatePropagation();
-      navigate("/login");
-      return false
-    };
+  if (isAdmin) {
+    alert("Los administradores no pueden realizar compras en la tienda.");
+    return false;
+  } else if (isInvitado) {
+    e.stopImmediatePropagation();
+    navigate("/login");
+    return false;
   }
-  return true
-}
+  return true;
+};
 
-// Configuración de inputs (Búsqueda y Ordenamiento)
-//TO DO : Verificacion de funcionamiento de filtros en conjunto
+// Configuración de inputs de las herramientas de control en la tienda
 const configurarControlesHerramientas = (): void => {
   const searchInput = document.getElementById("search-input") as HTMLInputElement;
   const sortSelect = document.getElementById("sort-select") as HTMLSelectElement;
 
   searchInput?.addEventListener("input", (e) => {
     busquedaTexto = (e.target as HTMLInputElement).value;
-    renderSegunCategoria(categoriaSeleccionadaId); // Re-renderiza combinando filtros
+    renderSegunCategoria(); // Re-renderiza sumando filtros acumulados
   });
 
   sortSelect?.addEventListener("change", (e) => {
     ordenSeleccionado = (e.target as HTMLSelectElement).value;
-    renderSegunCategoria(categoriaSeleccionadaId); // Re-renderiza combinando filtros
+    renderSegunCategoria(); // Re-renderiza sumando ordenamiento acumulado
   });
 };
 
 const main = document.getElementById("main-view");
 
 if (validarAccesoRuta()) {
-  main?.classList.add("main-content-block")
-  //Ejecutamos las funciones iniciales para activar los componentes
-  filtrarPorCategoria();
+  main?.classList.add("main-content-block");
+  configurarFiltroCategorias();
   configurarControlesHerramientas();
-  renderSegunCategoria('todas');
-  actualizarBadgeNavbar();
-};
+  
+  // Render inicial con todo en 'todas' y 'none'
+  renderSegunCategoria();
+}

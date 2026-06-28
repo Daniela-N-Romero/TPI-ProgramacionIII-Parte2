@@ -1,9 +1,11 @@
 import { ModalService } from "../../../utils/modals/modal";
 import type { FormaPago, IOrder } from "../../../types/IOrder";
-import { clearCart, removeFromCart, getCartTotal, getCartQuantity, updateCartItemQuantity, getCartByEmail} from "../../../utils/storage/cartStorage";
+import { clearCart, removeFromCart, getCartTotal, updateCartItemQuantity, getCartByEmail } from "../../../utils/storage/cartStorage";
 import { getActiveUser } from "../../../utils/storage/userStorage";
 import { registrarNuevoPedidoDelCliente } from "../../../utils/storage/orderStorage";
 import { AlertService } from "../../../utils/modals/alert";
+import { actualizarBadgeNavbar } from "../../../utils/layout";
+import { getProduct, saveOrUpdateProduct } from "../../../utils/storage/productStorage";
 
 // Envío (Documentado en README)
 const COSTO_ENVIO = 500;
@@ -15,7 +17,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const main = document.querySelector(".main-content");
     if (user.rol === "USUARIO") {
         main?.classList.add("main-content-block")
-        console.log(main)
         renderizarCarrito(user.mail);
     }
 });
@@ -32,7 +33,7 @@ const renderizarCarrito = async (email: string): Promise<void> => {
                 <button class="btn btn-primary" onclick="window.location.href='/tienda'">Ir a la Tienda</button>
             </div>
         `;
-        actualizarBadgeNavbar(0);
+        await actualizarBadgeNavbar();
         return;
     }
 
@@ -47,11 +48,12 @@ const renderizarCarrito = async (email: string): Promise<void> => {
             <div class="cart-item-info">
                 <h3>${item.producto.nombre}</h3>
                 <p class="cart-item-desc">${item.producto.descripcion}</p>
+                <p class="cart-item-desc"> Stock actual: ${item.producto.stock} unidades.</p>
                 <span class="cart-item-price">$${item.producto.precio.toFixed(2)} c/u</span>
             </div>
             <div class="cart-qty-actions">
                 <button class="btn-qty btn-minus" data-id="${item.producto.id}">-</button>
-                <span class="qty-value">${item.cantidad}</span>
+                <span class="qty-value-${item.producto.id}">${item.cantidad}</span>
                 <button class="btn-qty btn-plus" data-id="${item.producto.id}">+</button>
             </div>
             <div class="cart-item-subtotal">$${item.subtotal.toFixed(2)}</div>
@@ -60,15 +62,14 @@ const renderizarCarrito = async (email: string): Promise<void> => {
         itemsContainer.appendChild(itemCard);
     });
 
-    const subtotal =  await getCartTotal(email);
-    const totalUnidades =  await getCartQuantity(email);
+    const subtotal = await getCartTotal(email);
     const total = subtotal + COSTO_ENVIO;
 
     document.getElementById("summary-subtotal")!.textContent = `$${subtotal.toFixed(2)}`;
     document.getElementById("summary-shipping")!.textContent = `$${COSTO_ENVIO.toFixed(2)}`;
     document.getElementById("summary-total")!.textContent = `$${total.toFixed(2)}`;
 
-    actualizarBadgeNavbar(totalUnidades);
+    await actualizarBadgeNavbar();
     vincularEventosAcciones(email);
 };
 
@@ -82,23 +83,30 @@ const vincularEventosAcciones = (email: string): void => {
         const cart = await getCartByEmail(email);
         const item = cart.find(i => i.producto.id === id);
         if (!item) return;
+        const cantidadActual = document.querySelector(`.qty-value-${item.producto.id}`)!;
+        let numeroActual = parseInt(cantidadActual.textContent.trim(), 10);
 
         if (target.classList.contains("btn-plus")) {
             //  Validación respetando el stock disponible 
             if (item.cantidad >= item.producto.stock) {
-                 AlertService.warning(
-                                  "Error", 
-                                  `Lo sentimos, no hay más stock disponible (${item.producto.stock} unidades máx).`);
+                AlertService.warning(
+                    "Error",
+                    `Lo sentimos, no hay más stock disponible (${item.producto.stock} unidades máx).`);
                 return;
             }
+
+            cantidadActual.textContent = (numeroActual + 1).toString();
             //sumamos 1 por cada click
             await updateCartItemQuantity(id, item.cantidad + 1, email);
-            actualizarBadgeNavbar(await getCartQuantity(email))
+            await actualizarBadgeNavbar()
+
 
         } else if (target.classList.contains("btn-minus")) {
             // Si tiene 1 solo y selecciona menos, updateCartItemQuantity lo va a filtrar/eliminar automáticamente
+            cantidadActual.textContent = (numeroActual - 1).toString();
             await updateCartItemQuantity(id, item.cantidad - 1, email);
-            actualizarBadgeNavbar(await getCartQuantity(email))
+            await actualizarBadgeNavbar();
+            renderizarCarrito(email);
 
         } else if (target.classList.contains("btn-delete-item")) {
             await removeFromCart(email, id);
@@ -120,13 +128,8 @@ const vincularEventosAcciones = (email: string): void => {
     };
 };
 
-const actualizarBadgeNavbar = (count: number) => {
-    const badge = document.querySelector(".cart-badge");
-    if (badge) badge.textContent = count.toString();
-};
-
 /* --- CHECKOUT MODAL Y GENERACIÓN DE PEDIDO --- */
-const abrirModalCheckout = async (email:string): Promise<void> => {
+const abrirModalCheckout = async (email: string): Promise<void> => {
     const totalPagar = await getCartTotal(email) + COSTO_ENVIO;
 
     const htmlFormCheckout = `
@@ -195,15 +198,37 @@ const procesarConfirmacionPedido = async (formaPago: FormaPago, total: number): 
     };
 
     await registrarNuevoPedidoDelCliente(usuarioLogueado.mail, nuevoPedido)
-
+    await actualizarStockProductos(nuevoPedido);
     clearCart(usuarioLogueado.mail);
-    actualizarBadgeNavbar(await getCartQuantity(usuarioLogueado.mail));
+    await actualizarBadgeNavbar();
 
     ModalService.close();
     AlertService.success(
-                  "¡Pedido realizado con éxito!", 
-                  "Redirigiendo a tus pedidos..."
-                );
-        setTimeout(() => window.location.href = "/pedidos", 1500)
-    ;
+        "¡Pedido realizado con éxito!",
+        "Redirigiendo a tus pedidos..."
+    );
+    setTimeout(() => window.location.href = "/pedidos", 1500)
+        ;
+};
+
+const actualizarStockProductos = async (pedido: IOrder) => {
+
+    const detallesPedido = pedido.detalles;
+    for (const detalle of detallesPedido) {
+        const productoId = detalle.producto.id;
+
+        try {
+            const producto = await getProduct(productoId);
+
+            if (producto) {
+
+                console.log(`Producto: ${producto.nombre} | Stock actual: ${producto.stock}`);
+                producto.stock -= detalle.cantidad;
+                console.log("stock nuevo: ", producto.stock)
+                await saveOrUpdateProduct(producto);
+            }
+        } catch (error) {
+            console.error(`Error al actualizar el stock del producto ID ${productoId}:`, error);
+        }
+    }
 };

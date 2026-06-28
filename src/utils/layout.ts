@@ -96,16 +96,20 @@ export const actualizarBadgeNavbar = async (): Promise<void> => {
     const badge = document.querySelector('#nav-links .badge') as HTMLElement;
     if (!badge) return;
     const user = getActiveUser();
+    if (!user || !user.mail) {
+        badge.textContent = "0";
+        return;
+    }
     const cart = await getCartByEmail(user.mail);
     const totalItems = cart.reduce((acc, item) => acc + item.cantidad, 0);
     badge.innerText = totalItems.toString();
 };
 
 
-const renderLayout = () => {
+const renderLayout = async () => {
     renderNavbar();
     renderSidebar();
-    actualizarBadgeNavbar();
+    await actualizarBadgeNavbar();
 }
 
 renderLayout();

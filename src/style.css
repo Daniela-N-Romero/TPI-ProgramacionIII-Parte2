@@ -441,12 +441,12 @@ a:hover {
 }
 
 .search-box {
+    display: flex;
     flex: 1;
-    max-width: 400px;
 }
 
 .search-box input {
-    width: 100%;
+    flex: 1;
     padding: 0.6rem 1rem;
     border: 1px solid var(--border-color);
     border-radius: 6px;

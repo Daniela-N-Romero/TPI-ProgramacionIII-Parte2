@@ -22,7 +22,7 @@ const main = document.getElementById("main-view");
 main?.classList.add("main-content-block")
 if (validarAccesoRuta()) {
     renderProductDetail();
-    actualizarBadgeNavbar();
+    await actualizarBadgeNavbar();
 }
 
 async function renderProductDetail(): Promise<void> {
@@ -131,7 +131,7 @@ function configurarComponentesDetalle(maxStock: number, isInvitado: boolean): vo
         if (producto) {
             const user = getActiveUser();
             await addToCart(producto, cantidadAAgregar, user.mail);
-            actualizarBadgeNavbar();
+            await actualizarBadgeNavbar();
             
             AlertService.success(`${producto.nombre} al carrito con éxito!`, `¡Se agregaron ${cantidadAAgregar} x ${producto.nombre}`)
         }

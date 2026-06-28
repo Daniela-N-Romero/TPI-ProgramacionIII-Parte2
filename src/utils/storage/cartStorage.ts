@@ -1,5 +1,6 @@
 import type { IProduct } from '../../types/IProduct';
 import type { ICartItem } from '../../types/ICart'
+import { AlertService } from '../modals/alert.ts'
 import { getElementsFromStorage, saveArray, removeElement } from "./storageBase"
 
 //Funciones para traer, modificar, crear y eliminar datos del carrtio de local storage
@@ -19,10 +20,31 @@ export async function addToCart(product: IProduct, cantidad: number = 1, userEma
   const cart = await getCartByEmail(userEmail);
   const itemIndex = cart.findIndex(item => item.producto.id === product.id);
 
-  if (itemIndex !== -1) {                       // Si ya existe, sumamos la cantidad 
-    cart[itemIndex].cantidad += cantidad;
+  if (itemIndex !== -1) { // Si ya existe, sumamos la cantidad 
+    //validamos: cantidad actual en carrito + cantidad nueva NO debe superar el stock
+    const cantidadFinal = cart[itemIndex].cantidad + cantidad;
+    
+    if (cantidadFinal > product.stock) {
+      AlertService.warning(
+        "Límite de Stock", 
+        `No podés agregar más unidades de ${product.nombre}. Stock disponible: ${product.stock} u. (Ya tenés ${cart[itemIndex].cantidad} u. en el carrito)`
+      );
+      return; // Bloquea la ejecución y no guarda nada
+    }
+
+    cart[itemIndex].cantidad = cantidadFinal;    
     cart[itemIndex].subtotal = cart[itemIndex].cantidad * cart[itemIndex].producto.precio;
-  } else {                                      // Si es nuevo, lo agregamos
+
+  } else {      
+    // Si es nuevo en el carrito, validamos que la cantidad pedida no sea mayor al stock inicial
+    if (cantidad > product.stock) {
+      AlertService.warning(
+        "Límite de Stock", 
+        `No podés agregar esa cantidad. Stock disponible: ${product.stock} u.`
+      );
+      return;
+    }
+    
     cart.push({
       producto: product,
       cantidad: cantidad,
@@ -31,7 +53,7 @@ export async function addToCart(product: IProduct, cantidad: number = 1, userEma
   }
 
   saveCartByEmail(userEmail, cart);
-}
+};
 
 
 //FUNCIONES AUXILIARES 
@@ -57,8 +79,7 @@ export async function updateCartItemQuantity(productId: number, nuevaCantidad: n
 
   if (itemIndex !== -1) {
     if (nuevaCantidad <= 0) {
-      // Si la cantidad pasa a ser 0 o menos, lo eliminamos automáticamente
-      cart = cart.filter(item => item.producto.id !== productId);
+      removeFromCart(userEmail, cart[itemIndex].producto.id)
     } else {
       cart[itemIndex].cantidad = nuevaCantidad;
       cart[itemIndex].subtotal = nuevaCantidad * cart[itemIndex].producto.precio;
