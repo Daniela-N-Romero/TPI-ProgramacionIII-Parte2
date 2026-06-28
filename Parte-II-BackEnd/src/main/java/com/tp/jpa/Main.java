@@ -15,6 +15,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class Main {
@@ -42,9 +43,11 @@ public class Main {
             System.out.println("\n=========================================");
             System.out.println("       MENÚ PRINCIPAL - PARCIAL 2        ");
             System.out.println("=========================================");
-            System.out.println("1. ABM Categorías");
-            System.out.println("2. ABM Productos");
-            System.out.println("3. Listar Productos por Categoría");
+            System.out.println("1. Gestionar Categorías");
+            System.out.println("2. Gestionar Productos");
+            System.out.println("3. Gestionar Usuarios");
+            System.out.println("4. Gestionar Pedidos");
+            System.out.println("5. Reportes");
             System.out.println("0. Salir");
             System.out.print("Seleccione una opción: ");
 
@@ -53,12 +56,14 @@ public class Main {
                 switch (opcion) {
                     case 1: menuCategorias(); break;
                     case 2: menuProductos(); break;
-                    case 3: consultarProductosPorCategoria(); break;
+                    case 3: menuUsuarios(); break;
+                    case 4: menuPedidos(); break;
+                    case 5: menuReportes(); break;
                     case 0: System.out.println("\n-- Adios --"); break;
-                    default: System.out.println("\n[ERROR] Opción inválida.");
+                    default: System.out.println("\n-- Opción inválida. --\n"); break;
                 }
             } catch (NumberFormatException e) {
-                System.out.println("\n[ERROR] Por favor, ingrese un número válido.");
+                System.out.println("\nError: Por favor, ingrese un número válido.");
                 opcion = -1;
             }
         } while (opcion != 0);
@@ -79,9 +84,9 @@ public class Main {
         do {
             System.out.println("\n--- GESTIÓN DE CATEGORÍAS ---");
             System.out.println("1. Crear Categoría");
-            System.out.println("2. Listar Categorías Activas");
-            System.out.println("3. Modificar Categoría");
-            System.out.println("4. Baja Lógica de Categoría");
+            System.out.println("2. Modificar Categoría");
+            System.out.println("3. Baja Lógica de Categoría");
+            System.out.println("4. Listar Categorías Activas");
             System.out.println("0. Volver al Menú Principal");
             System.out.print("Seleccione una opción: ");
 
@@ -97,7 +102,7 @@ public class Main {
                             break;
                         }
 
-                        System.out.print("Ingrese la descripción: ");
+                        System.out.print("Ingrese la descripción: (presione ENTER para omitir)");
                         String desc = scanner.nextLine().trim();
 
                         Categoria nuevaCategoria = Categoria.builder().nombre(nombre).descripcion(desc).build();
@@ -109,18 +114,8 @@ public class Main {
                         }
                         break;
 
-                    case 2: //LISTAR CATEGORIAS
-                        List<Categoria> activas = categoriaRepo.listarActivos();
-                        if (activas.isEmpty()) {
-                            System.out.println("\nNo hay categorías activas registradas.");
-                        } else {
-                            System.out.println("\nListado de Categorías Activas:");
-                            for (Categoria cat : activas) {
-                                System.out.println("ID: " + cat.getId() + " | Nombre: " + cat.getNombre() + " | Descripción: " + cat.getDescripcion());
-                            }
-                        }
-                        break;
-                    case 3: // MODIFICAR CATEGORÍA
+
+                    case 2: // MODIFICAR CATEGORÍA
                         System.out.print("Ingrese el ID de la categoría a modificar: ");
                         Long idCatMod = Long.parseLong(scanner.nextLine());
 
@@ -145,7 +140,7 @@ public class Main {
                                 () -> System.out.println("El ID ingresado no corresponde a una categoría activa.")
                         );
                         break;
-                    case 4: // BAJA LÓGICA DE CATEGORÍA
+                    case 3: // BAJA LÓGICA DE CATEGORÍA
                         System.out.print("Ingrese el ID de la categoría a dar de baja: ");
                         Long idCatBaja = Long.parseLong(scanner.nextLine());
 
@@ -166,6 +161,20 @@ public class Main {
                                 }
                         );
                         break;
+
+                    case 4: //LISTAR CATEGORIAS
+                        List<Categoria> activas = categoriaRepo.listarActivos();
+                        if (activas.isEmpty()) {
+                            System.out.println("\nNo hay categorías activas registradas.");
+                        } else {
+                            System.out.println("\nListado de Categorías Activas:");
+                            for (Categoria cat : activas) {
+                                System.out.println("ID: " + cat.getId() + " | Nombre: " + cat.getNombre() + " | Descripción: " + cat.getDescripcion());
+                            }
+                        }
+                        break;
+
+
                     case 0: break;
                     default: System.out.println("\nOpción inválida.");
                 }
@@ -184,9 +193,9 @@ public class Main {
         do {
             System.out.println("\n--- GESTIÓN DE PRODUCTOS ---");
             System.out.println("1. Crear Producto");
-            System.out.println("2. Listar Productos Activos");
-            System.out.println("3. Modificar Producto");
-            System.out.println("4. Baja Lógica de Producto");
+            System.out.println("2. Modificar Producto");
+            System.out.println("3. Baja Lógica de Producto");
+            System.out.println("4. Listar Productos Activos");
             System.out.println("0. Volver al Menú Principal");
             System.out.print("Seleccione una opción: ");
 
@@ -205,49 +214,87 @@ public class Main {
                                 System.out.println("  [" + cat.getId() + "] " + cat.getNombre())
                         );
 
-                        System.out.print("\nNombre del producto: ");
-                        String prodNombre = scanner.nextLine().trim();
-                        if (prodNombre.isEmpty()) {
-                            System.out.println("[ERROR] El nombre no puede estar vacío.");
+                        System.out.print("ID de Categoría a asociar: ");
+                        Long catId;
+                        try {
+                            catId = Long.parseLong(scanner.nextLine());
+                        } catch (NumberFormatException e) {
+                            System.out.println("Error: El ID de categoría debe ser un número entero. Operación cancelada.");
                             break;
                         }
 
-                        System.out.print("Descripción: ");
+                        Optional<Categoria> catOptional = categoriaRepo.buscarPorId(catId);
+                        if (catOptional.isEmpty()) {
+                            System.out.println("Error: La categoría seleccionada no existe o está inactiva. Operación cancelada.");
+                            break;
+                        }
+                        Categoria categoriaSeleccionada = catOptional.get();
+
+                        System.out.print("\nNombre del producto: ");
+                        String prodNombre = scanner.nextLine().trim();
+
+                        while (prodNombre.isEmpty()) {
+                            System.out.println("Error: El nombre no puede estar vacío. Vuelva a intentarlo.");
+                            System.out.print("\nNombre del producto: ");
+                            prodNombre = scanner.nextLine().trim();
+                        }
+
+                        System.out.print("Descripción: (opcional)");
                         String prodDesc = scanner.nextLine().trim();
 
                         System.out.print("Precio: ");
-                        double precio = Double.parseDouble(scanner.nextLine());
-
-                        if (precio <= 0) {
-                            System.out.println("[ERROR] El precio debe ser mayor a 0. No se persiste.");
+                        double precio;
+                        try {
+                            precio = Double.parseDouble(scanner.nextLine());
+                        } catch (NumberFormatException e) {
+                            System.out.println("Error: El precio debe ser un número válido. No se persiste.");
+                            break;
+                        }
+                        if (precio <= 0) { // REQUISITO: Mayor a 0
+                            System.out.println("Error: El precio debe ser mayor a 0. No se persiste.");
                             break;
                         }
 
                         System.out.print("Stock inicial: ");
-                        int stock = Integer.parseInt(scanner.nextLine());
-
-                        if (stock < 0) {
-                            System.out.println("[ERROR] El stock no puede ser negativo. No se persiste.");
+                        int stock;
+                        try {
+                            stock = Integer.parseInt(scanner.nextLine());
+                        } catch (NumberFormatException e) {
+                            System.out.println("Error: El stock debe ser un número entero válido. No se persiste.");
+                            break;
+                        }
+                        if (stock < 0) { // REQUISITO: Mayor o igual a 0
+                            System.out.println("Error: El stock no puede ser negativo. No se persiste.");
                             break;
                         }
 
-                        System.out.print("Nombre de archivo de imagen: ");
+                        System.out.print("¿El producto está disponible? S/N (valor por defecto: Si)");
+                        String respuesta = scanner.nextLine().trim();
+                        Boolean disponible = true;
+                        if (respuesta.equalsIgnoreCase("N")) {
+                            disponible = false;
+                        }
+
+                        System.out.print("Nombre de archivo de imagen: (opcional)");
                         String imagen = scanner.nextLine().trim();
 
-                        System.out.print("ID de Categoría a asociar: ");
-                        Long catId = Long.parseLong(scanner.nextLine());
-
-
                             Producto nuevoProd = Producto.builder()
-                                    .nombre(prodNombre).descripcion(prodDesc)
-                                    .precio(precio).stock(stock).imagen(imagen)
-                                    .disponible(stock > 0)
+                                    .nombre(prodNombre)
+                                    .descripcion(prodDesc)
+                                    .precio(precio)
+                                    .stock(stock)
+                                    .imagen(imagen.isEmpty() ? null : imagen)
+                                    .disponible(disponible)
                                     .build();
                             try {
                                 // Guardamos el producto y obtenemos la copia persistida con su ID
                                 Producto productoGuardado = productoRepo.guardar(nuevoProd);
+                                categoriaSeleccionada.getProductos().add(productoGuardado);
+                                categoriaRepo.guardar(categoriaSeleccionada);
+
                                 System.out.println("\nProducto creado con éxito:");
                                 System.out.println("  ID Generado: " + productoGuardado.getId());
+                                System.out.println("  Categoria Asignada: " + categoriaSeleccionada.getNombre());
 
 
                             } catch (Exception e) {
@@ -256,20 +303,12 @@ public class Main {
 
                         break;
 
-                    case 2: // LISTAR
-                        List<Producto> prods = productoRepo.listarActivos();
-                        if (prods.isEmpty()) {
-                            System.out.println("\nNo hay productos activos en el catálogo.");
-                        } else {
-                            System.out.println("\nListado de Productos Activos:");
-                            for (Producto p : prods) {
-                                System.out.println("ID: " + p.getId() + " | " + p.getNombre() + " - $" + p.getPrecio() + " (Stock: " + p.getStock() + ")");
-                            }
-                        }
-                        break;
+                    case 2: // MODIFICAR
 
-                    case 3: // MODIFICAR
-                        System.out.print("Ingrese el ID del producto a modificar: ");
+                        System.out.println("\nProductos activos:\n");
+                        productoRepo.listarActivos();
+
+                        System.out.println("Ingrese el ID del producto a modificar: ");
                         Long idMod = Long.parseLong(scanner.nextLine());
                         productoRepo.buscarPorId(idMod).ifPresentOrElse(
 
@@ -311,12 +350,12 @@ public class Main {
                             },
                                 () -> {
                                     // --- Bloque NO EXISTE ---
-                                    System.out.println("El ID ingresado no corresponde a un producto activo.");
+                                    System.out.println("El ID ingresado no corresponde a un producto activo. Saliendo...");
                                 }
                         );
                         break;
 
-                    case 4: // BAJA LÓGICA
+                    case 3: // BAJA LÓGICA
                         System.out.print("Ingrese el ID del producto a dar de baja: ");
                         Long idProdBaja = Long.parseLong(scanner.nextLine());
 
@@ -334,10 +373,26 @@ public class Main {
                                     }
                                 },
                                 () -> {
-                                    System.out.println("\nEl ID ingresado no existe o ya corresponde a un producto dado de baja.");
+                                    System.out.println("\nEl ID ingresado no existe o ya corresponde a un producto dado de baja. Saliendo...");
                                 }
                         );
                         break;
+
+                    case 4: // LISTAR
+                        List<Producto> prods = productoRepo.listarActivos();
+                        if (prods.isEmpty()) {
+                            System.out.println("\nNo hay productos activos en el catálogo.");
+                        } else {
+                            System.out.println("\nListado de Productos Activos:");
+                            for (Producto p : prods) {
+                                boolean pDisponibilidad = p.isDisponible();
+                                String disponibilidadProd = pDisponibilidad ? "SI" : "NO";
+
+                                System.out.println("ID: " + p.getId() + " | " + p.getNombre() + " - $" + p.getPrecio() + " (Stock: " + p.getStock() + " - ¿disponible?: " + disponibilidadProd + ")");
+                            }
+                        }
+                        break;
+
 
                     case 0: break;
                     default: System.out.println("\nOpción inválida.");
@@ -392,7 +447,7 @@ public class Main {
                 }
             }
         } catch (NumberFormatException e) {
-            System.out.println("\n[ERROR] Debe ingresar un ID numérico válido.");
+            System.out.println("\nError: Debe ingresar un ID numérico válido.");
         }
     }
 
@@ -469,7 +524,7 @@ public class Main {
                 if (em.getTransaction().isActive()) {
                     em.getTransaction().rollback();
                 }
-                System.out.println("[ERROR] No se pudieron cargar los datos iniciales: " + e.getMessage());
+                System.out.println("Error: No se pudieron cargar los datos iniciales: " + e.getMessage());
             }
         } else {
             System.out.println("\n--- La base de datos ya contiene información. Se omitió la carga inicial. ---");
