@@ -52,9 +52,20 @@ public abstract class BaseRepositoryImpl<T extends Base> implements BaseReposito
         EntityManager em = emf.createEntityManager();
         try {
             em.getTransaction().begin();
-            T persistida = em.merge(entidad); // Guardamos la copia que tiene el ID real de la BD
+            T entidadRetorno;
+
+            if (entidad.getId() == null) {
+                // REQUISITO: Es un ALTA -> usamos persist()
+                em.persist(entidad);
+                // Con persist(), la misma instancia 'entidad' recibe el ID autogenerado.
+                entidadRetorno = entidad;
+            } else {
+                // REQUISITO: Es una MODIFICACIÓN -> usamos merge()
+                // merge() nos devuelve una copia gestionada con los cambios aplicados
+                entidadRetorno = em.merge(entidad);
+            }
             em.getTransaction().commit();
-            return persistida; // Devolvemos la entidad con el ID
+            return entidadRetorno; // Devolvemos la entidad con el ID
         } catch (Exception e) {
             if (em.getTransaction().isActive()) em.getTransaction().rollback();
             throw e;
@@ -73,6 +84,7 @@ public abstract class BaseRepositoryImpl<T extends Base> implements BaseReposito
             }
             em.getTransaction().begin();
             entity.setEliminado(true);
+            em.merge(entity);
             em.getTransaction().commit();
             return true;
         } catch (Exception e) {

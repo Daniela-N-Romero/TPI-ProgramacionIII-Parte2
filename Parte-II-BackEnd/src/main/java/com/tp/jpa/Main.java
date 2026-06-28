@@ -10,9 +10,9 @@ import com.tp.jpa.model.enums.FormaPago;
 
 import com.tp.jpa.repository.CategoriaRepository;
 import com.tp.jpa.repository.ProductoRepository;
+import com.tp.jpa.util.JPAUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
 
 import java.util.List;
 import java.util.Scanner;
@@ -26,8 +26,8 @@ public class Main {
 
     public static void main(String[] eloquence) {
 
-
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("miUnidad");        em = emf.createEntityManager();
+        EntityManagerFactory emf = JPAUtil.getEntityManagerFactory();
+        em = emf.createEntityManager();
 
         // Inicialización de los repositorios de la capa de datos
         categoriaRepo = new CategoriaRepository(emf);
@@ -63,8 +63,12 @@ public class Main {
             }
         } while (opcion != 0);
 
-        em.close();
-        emf.close();
+        if (em != null && em.isOpen()) {
+            em.close();
+        }
+
+        // REQUISITO EXPLÍCITO: Cerramos el factory global al finalizar la app
+        JPAUtil.close();
     }
 
     // =========================================================================
@@ -375,7 +379,7 @@ public class Main {
             }
 
             // Invocacamos al ProductoRepository que usa JPQL, TypedQuery y filtrado activo
-            List<Producto> productosFiltrados = categoriaRepo.buscarPorCategoria(catId);
+            List<Producto> productosFiltrados = categoriaRepo.buscarProductosPorCategoria(catId);
 
             // Si la categoría no tiene productos activos, se informa explícitamente
             if (productosFiltrados.isEmpty()) {

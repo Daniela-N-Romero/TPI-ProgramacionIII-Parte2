@@ -12,13 +12,17 @@ public class CategoriaRepository extends BaseRepositoryImpl<Categoria> {
     public CategoriaRepository(EntityManagerFactory emf) {
         super(emf, Categoria.class);
     }
-    public List<Producto> buscarProductosPorCategoria(Long categoria_id) {
+
+    // Consulta JPQL: retorna los productos activos de una categoría.
+    // Como la relación es unidireccional y Categoria es la dueña, se
+    // navega desde Categoria hacia su colección c.productos mediante JOIN
+    public List<Producto> buscarProductosPorCategoria(Long categoriaId) {
         EntityManager em = this.emf.createEntityManager();
         try {
-            String jpql = "SELECT p FROM Categoria c JOIN c.productos p WHERE c.id = :categoria_id AND p.eliminado = false";
+            String jpql = "SELECT p FROM Categoria c JOIN c.productos p WHERE c.id = :catId AND p.eliminado = false";
 
             return em.createQuery(jpql, Producto.class)
-                    .setParameter("categoria_id", categoria_id)
+                    .setParameter("catId", categoriaId)
                     .getResultList();
         } catch (Exception e) {
             throw e;
