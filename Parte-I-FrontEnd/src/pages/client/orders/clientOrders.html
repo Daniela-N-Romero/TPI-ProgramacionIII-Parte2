@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Store</title>
+    <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+
+    <header class="header-nav">
+        <div class="logo">
+            <span>🍕</span> Food Store
+        </div>
+        <nav>            
+            <ul class="nav-links" id="nav-links"></ul>
+        </nav>
+    </header>
+
+    <div class="app-container">
+
+        <main class="main-content" id="main-view">
+            </main>
+    </div>
+
+    <div class="modal-overlay" id="global-modal">
+        <div class="modal-card">
+            <button class="modal-close" id="close-modal">&times;</button>
+            <div id="modal-content">
+                </div>
+        </div>
+    </div>
+        <script type="module" src="/src/utils/layout.ts"></script>
+        <script type="module" src="/src/pages/client/orders/clientOrders.ts"></script>
+</body>
+</html>

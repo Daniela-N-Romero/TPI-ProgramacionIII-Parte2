@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Store</title>
+    <link rel="stylesheet" href="/src/style.css">
+</head>
+
+<body>
+
+    <header class="header-nav">
+        <div class="logo"><span>🍕</span> Food Store</div>
+        <nav>
+            <ul class="nav-links" id="nav-links"></ul>
+        </nav>
+    </header>
+
+    <div class="app-container">
+        <main class="main-content page-container">
+            <h1 class="page-title">Mi Carrito</h1>
+
+            <div id="cart-content-wrapper">
+                <div class="cart-grid">
+                    <section class="cart-items-list" id="cart-items-container"></section>
+
+                    <aside class="cart-summary-card">
+                        <h2>Resumen del Pedido</h2>
+                        <div class="summary-row">
+                            <span>Subtotal:</span>
+                            <span id="summary-subtotal">$0.00</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Envío:</span>
+                            <span id="summary-shipping">$0.00</span>
+                        </div>
+                        <hr class="summary-divider">
+                        <div class="summary-row total-row">
+                            <strong>Total:</strong>
+                            <strong id="summary-total" class="text-primary">$0.00</strong>
+                        </div>
+
+                        <button id="btn-proceed-checkout" class="btn btn-primary btn-block">Proceder al Pago</button>
+                        <button id="btn-clear-cart" class="btn btn-danger-outline btn-block">Vaciar Carrito</button>
+                    </aside>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="global-modal">
+        <div class="modal-card">
+            <button class="modal-close" id="close-modal">&times;</button>
+            <div id="modal-content">
+            </div>
+        </div>
+    </div>
+    <script type="module" src="/src/utils/layout.ts"></script>
+    <script type="module" src="/src/pages/store/cart/cart.ts"></script>
+</body>
+
+</html>
