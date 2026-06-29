@@ -19,6 +19,7 @@ public class Usuario extends Base {
     @Column(unique = true)
     private String mail;
     private String contrasenia;
+    private String celular;
     @Enumerated(EnumType.STRING)
     private Rol rol;
     // Relación 1..m: Un usuario tiene muchos pedidos
