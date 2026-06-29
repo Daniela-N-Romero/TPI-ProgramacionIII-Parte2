@@ -21,13 +21,13 @@ public class UsuarioRepository extends BaseRepositoryImpl<Usuario> {
 // Se filtra por el id del usuario (:uid) y por p.eliminado = false
 // para excluir las bajas lógicas.
 
-    public List<Pedido> buscarPedidosPorUsuario(Long idUsuario) {
+    public List<Pedido> buscarPedidosPorUsuario(Long uid) {
         EntityManager em = this.emf.createEntityManager();
         try {
             String jpql = "SELECT p FROM Usuario u JOIN u.pedidos p WHERE u.id = :uid AND p.eliminado = false";
 
             return em.createQuery(jpql, Pedido.class)
-                    .setParameter("uid", idUsuario)
+                    .setParameter("uid", uid)
                     .getResultList();
 
         } catch (Exception e) {
@@ -40,7 +40,9 @@ public class UsuarioRepository extends BaseRepositoryImpl<Usuario> {
     }
 
     // Consulta JPQL: busca un usuario activo por su dirección de correo electrónico
-    // Retorna Optional para manejar el caso en que el mail no esté registrado String jpql = "SELECT u FROM Usuario u WHERE u.mail = :mail AND u.eliminado = false";
+    // Retorna Optional para manejar el caso en que el mail no esté registrado
+    // Se compara el mail enviado como parametro con el parámetro nombrado :mail
+    // y se verifica que sea un usuario NO eliminado.
     public Optional<Usuario> buscarPorMail(String mail) {
         EntityManager em = this.emf.createEntityManager();
 

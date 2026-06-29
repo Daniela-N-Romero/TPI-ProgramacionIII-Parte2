@@ -13,8 +13,8 @@ public class PedidoRepository extends BaseRepositoryImpl<Pedido> {
         super(emf, Pedido.class);
     }
 
-// Consulta JPQL: retorna todos los pedidos activos con un estado específico
-// Útil para filtrar PENDIENTE, CONFIRMADO, TERMINADO o CANCELADO
+    // Consulta JPQL: retorna todos los pedidos activos con un estado específico
+    // Se filtra por: PENDIENTE, CONFIRMADO, TERMINADO o CANCELADO
 
     public List<Pedido> buscarPorEstado(Estado estado) {
         EntityManager em = this.emf.createEntityManager();

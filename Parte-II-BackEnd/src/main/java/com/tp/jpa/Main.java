@@ -16,6 +16,7 @@ import com.tp.jpa.util.JPAUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +49,7 @@ public class Main {
 
         do {
             System.out.println("\n=========================================");
-            System.out.println("       MENÚ PRINCIPAL - PARCIAL 2        ");
+            System.out.println("       MENÚ PRINCIPAL - TPI PARTE 2        ");
             System.out.println("=========================================");
             System.out.println("1. Gestionar Categorías");
             System.out.println("2. Gestionar Productos");
@@ -285,29 +286,68 @@ public class Main {
                         System.out.print("Nombre de archivo de imagen: (opcional)");
                         String imagen = scanner.nextLine().trim();
 
+
+
+                        try {
+                            // 1. Instanciar el producto plano (sin conocer a la categoría)
                             Producto nuevoProd = Producto.builder()
                                     .nombre(prodNombre)
                                     .descripcion(prodDesc)
                                     .precio(precio)
                                     .stock(stock)
-                                    .imagen(imagen.isEmpty() ? null : imagen)
-                                    .disponible(disponible)
+                                    .disponible(true)
                                     .build();
+
+                            // Guardar el producto de forma totalmente aislada usando su repositorio.
+                            // Como NO hay cascada por defecto, este paso es OBLIGATORIO para que el producto exista en la BD
+                            // y la base de datos le asigne su ID único correlativo.
+                            Producto productoGuardado = productoRepo.guardar(nuevoProd);
+
+                            //Abrir el EntityManager manual exclusivo para manejar la relación LAZY de Categoria
+                            EntityManager emParaAsociar = JPAUtil.getEntityManagerFactory().createEntityManager();
                             try {
-                                // Guardamos el producto y obtenemos la copia persistida con su ID
-                                Producto productoGuardado = productoRepo.guardar(nuevoProd);
-                                categoriaSeleccionada.getProductos().add(productoGuardado);
-                                categoriaRepo.guardar(categoriaSeleccionada);
+                                emParaAsociar.getTransaction().begin();
 
-                                System.out.println("\nProducto creado con éxito:");
-                                System.out.println("  ID Generado: " + productoGuardado.getId());
-                                System.out.println("  Categoria Asignada: " + categoriaSeleccionada.getNombre());
+                                // Buscar la categoría seleccionada usando orElseThrow() con el repositorio
+                                Categoria categoriaSelected = categoriaRepo.buscarPorId(catId)
+                                        .orElseThrow(() -> new Exception("La categoría seleccionada no existe o está dada de baja."));
 
+                                // Traer la categoría al contexto vivo de ESTE EntityManager manual
+                                Categoria catGestionada = emParaAsociar.find(Categoria.class, categoriaSelected.getId());
+
+                                // Traer el producto que acabamos de guardar al contexto vivo actual
+                                Producto prodGestionado = emParaAsociar.find(Producto.class, productoGuardado.getId());
+
+                                // Añadir el producto gestionado a la colección de la categoría viva
+                                // Como emParaAsociar está vivo, Hibernate carga el proxy Lazy de la lista y añade el elemento sin errores
+                                catGestionada.getProductos().add(prodGestionado);
+
+                                // Hacer commit. El Dirty Checking detecta que la lista de la categoría cambió
+                                // y mete el UPDATE correspondiente en la BD (asocia la FK en la tabla)
+                                emParaAsociar.getTransaction().commit();
+
+                                System.out.println("\n=========================================");
+                                System.out.println(" ¡PRODUCTO CREADO Y ASOCIADO CON ÉXITO! ");
+                                System.out.println("=========================================");
+                                System.out.println("  ID Generado: " + prodGestionado.getId()); // ID real de la BD
+                                System.out.println("  Nombre del Producto: " + prodGestionado.getNombre());
+                                System.out.println("  Precio: $" + prodGestionado.getPrecio());
+                                System.out.println("  Categoría Asignada: " + catGestionada.getNombre());
 
                             } catch (Exception e) {
-                                System.out.println("Ocurrió un error al guardar el producto: " + e.getMessage());
+                                if (emParaAsociar.getTransaction().isActive()) {
+                                    emParaAsociar.getTransaction().rollback();
+                                }
+                                throw e; // Relanzamos para el catch general
+                            } finally {
+                                if (emParaAsociar != null && emParaAsociar.isOpen()) {
+                                    emParaAsociar.close();
+                                }
                             }
 
+                        } catch (Exception e) {
+                            System.out.println("\nOcurrió un error al guardar el producto: " + e.getMessage());
+                        }
                         break;
 
                     case 2: // MODIFICAR
@@ -322,33 +362,39 @@ public class Main {
                         producto -> {
                             // --- Bloque SI EXISTE ---
                             System.out.println("Producto encontrado: " + producto.getNombre());
+
+                            // --- VALIDACIÓN PARA EL NOMBRE ---
                             System.out.print("Ingrese nuevo nombre (o presione Enter para mantener '" + producto.getNombre() + "'): ");
                             String nuevoNombre = scanner.nextLine();
                             if (!nuevoNombre.trim().isEmpty()) {
                                 producto.setNombre(nuevoNombre);
                             }
 
-                            // --- VALIDACIÓN PARA EL NOMBRE ---
-                            System.out.print("Nuevo nombre (actual: '" + producto.getNombre() + "', presione ENTER para mantener): ");
-                            String entradaNombre = scanner.nextLine();
-                            if (!entradaNombre.trim().isEmpty()) {
-                                producto.setNombre(entradaNombre);
+                            // --- VALIDACIÓN PARA LA DESCRIPCIÓN ---
+                            System.out.print("Nueva descripción (actual: '" + producto.getDescripcion() + "', presione ENTER para mantener): ");
+                            String entradaDescripcion = scanner.nextLine();
+                            if (!entradaDescripcion.trim().isEmpty()) {
+                                producto.setDescripcion(entradaDescripcion);
                             }
 
                             // --- VALIDACIÓN PARA EL PRECIO ---
                             System.out.print("Nuevo precio (actual: " + producto.getPrecio() + ", presione ENTER para mantener): ");
                             String entradaPrecio = scanner.nextLine();
-                            if (!entradaPrecio.trim().isEmpty()) {
+                            if (!entradaPrecio.trim().isEmpty() && Double.parseDouble(entradaPrecio) > 0.00) {
                                 producto.setPrecio(Double.parseDouble(entradaPrecio));
+                            }else{
+                                System.out.println("El valor no puede ser negativo. Se mantiene valor actual.");
                             }
 
                             // --- VALIDACIÓN PARA EL STOCK ---
                             System.out.print("Nuevo stock (actual: " + producto.getStock() + ", presione ENTER para mantener): ");
                             String entradaStock = scanner.nextLine();
-                            if (!entradaStock.trim().isEmpty()) {
+                            if (!entradaStock.trim().isEmpty()  && Integer.parseInt(entradaStock) > 0) {
                                 int nuevoStock = Integer.parseInt(entradaStock);
                                 producto.setStock(nuevoStock);
                                 producto.setDisponible(nuevoStock > 0);
+                            }else{
+                                System.out.println("El valor no puede ser negativo. Se mantiene valor actual.");
                             }
 
                             // Guardamos los cambios
@@ -395,7 +441,7 @@ public class Main {
                                 boolean pDisponibilidad = p.isDisponible();
                                 String disponibilidadProd = pDisponibilidad ? "SI" : "NO";
 
-                                System.out.println("ID: " + p.getId() + " | " + p.getNombre() + " - $" + p.getPrecio() + " (Stock: " + p.getStock() + " - ¿disponible?: " + disponibilidadProd + ")");
+                                System.out.println("ID: " + p.getId() + " | " + p.getNombre() + " - $" + p.getPrecio() + " (Stock: " + p.getStock() + " - ¿disponible?: " + disponibilidadProd + ") | " + p.getDescripcion() );
                             }
                         }
                         break;
@@ -603,21 +649,22 @@ public class Main {
             }
 
             switch (opcion) {
-                // TO DO verificar funcionamiento
-                //estan bien los continue?
-                case 1: // ALTA DE PEDIDO (FLUJO DE TRANSACCIÓN ÚNICA)
 
-                    // DETERMINAR USUARIO
-                    List<Usuario> usuarios = usuarioRepo.listarActivos();
-                    if (usuarios.isEmpty()) {
+                case 1: // ALTA DE PEDIDO (FLUJO DE TRANSACCIÓN ÚNICA)
+                {
+                    // DETERMINAR USUARIO: Si no existe ninguno no es posible agregar un pedido. Se sale del flujo con un break
+                    List<Usuario> usuariosActivos = usuarioRepo.listarActivos();
+                    if (usuariosActivos.isEmpty()) {
                         System.out.println("No existen usuarios activos en el sistema. Operación cancelada.");
                         break;
                     }
                     System.out.println("Usuarios activos disponibles:");
-                    usuarios.forEach(u -> System.out.println("  [" + u.getId() + "] " + u.getApellido() + ", " + u.getNombre()));
+                    usuariosActivos.forEach(u -> System.out.println("  [" + u.getId() + "] " + u.getApellido() + ", " + u.getNombre()));
 
                     System.out.print("Seleccione el ID del usuario: ");
-                    Long idUsuario;
+                    long idUsuario;
+
+                    //Si el ID no es un número o si no coincide con el de ningún usuario se sale del flujo con un break
                     try {
                         idUsuario = Long.parseLong(scanner.nextLine()); }
                     catch (NumberFormatException e) {
@@ -625,13 +672,20 @@ public class Main {
                     }
 
                     Optional<Usuario> optU = usuarioRepo.buscarPorId(idUsuario);
-                    if (optU.isEmpty()) { System.out.println("Error: El usuario no existe o está inactivo."); break; }
+                    if (optU.isEmpty()) {
+                        System.out.println("Error: El usuario no existe o está inactivo.");
+                        break;
+                    }
                     Usuario usuarioSeleccionado = optU.get();
+
+                    //----------------------------------------------------------------------------------------------------
 
                     // DETERMINAR FORMA DE PAGO
                     System.out.print("Ingrese Forma de Pago (TARJETA, TRANSFERENCIA, EFECTIVO): ");
                     String fpStr = scanner.nextLine().trim().toUpperCase();
                     FormaPago formaPago;
+
+                    //si se ingresa una forma de pago inválida se sale del flujo con un break
                     try {
                         formaPago = FormaPago.valueOf(fpStr);
                     } catch (IllegalArgumentException e) {
@@ -639,58 +693,81 @@ public class Main {
                         break;
                     }
 
+                    //----------------------------------------------------------------------------------------------------
+
                     // CARGA DE PRODUCTOS EN MEMORIA
                     List<ItemTemporal> carrito = new ArrayList<>();
                     boolean continuarAgregando = true;
 
                     do {
+                        //se listan los productos: si no hay productos cargados se sale del flujo con un break
                         List<Producto> catalogo = productoRepo.listarActivos();
-                        if (catalogo.isEmpty()) { System.out.println("Catálogo vacío."); break; }
+                        if (catalogo.isEmpty()) {
+                            System.out.println("Catálogo vacío.");
+                            break;
+                        }
 
                         System.out.println("\n--- Catálogo de Productos Activos ---");
                         catalogo.forEach(p -> System.out.println("  [" + p.getId() + "] " + p.getNombre() + " | Precio: $" + p.getPrecio() + " | Stock: " + p.getStock()));
 
                         System.out.print("Ingrese el ID del producto a agregar: ");
                         Long idProd;
+
+                        //Si el ID de producto es inválido, el producto no existe, está dado de baja o no está disponible: se vuelve a iniciar el bucle (con el uso de continue)
                         try {
                             idProd = Long.parseLong(scanner.nextLine());
-                        } catch (NumberFormatException e)
-                        { System.out.println("ID inválido."); continue; }
+                        } catch (NumberFormatException e) { System.out.println("ID inválido. Vuelva a empezar la carga del producto..."); continue; }
 
                         Optional<Producto> optP = productoRepo.buscarPorId(idProd);
-                        if (optP.isEmpty()) { System.out.println("Error: El producto no existe o está dado de baja."); continue; }
+                        if (optP.isEmpty()) { System.out.println("Error: El producto no existe o está dado de baja. Vuelva a empezar la carga del producto..."); continue; }
                         Producto prod = optP.get();
 
-                        if (!prod.isDisponible()) { System.out.println("Error: El producto no se encuentra disponible."); continue; }
+                        if (!prod.isDisponible()) { System.out.println("Error: El producto no se encuentra disponible. Vuelva a empezar la carga del producto..."); continue; }
 
+                        //Si la cantidad ingresada no es un número o es menor a 0: se vuelve a iniciar el bucle (con el uso de continue)
                         System.out.print("Ingrese cantidad: ");
                         int cantidad;
-                        try { cantidad = Integer.parseInt(scanner.nextLine()); } catch (NumberFormatException e) { System.out.println("Cantidad inválida."); continue; }
+                        try {
+                            cantidad = Integer.parseInt(scanner.nextLine());
+                        } catch (NumberFormatException e) { System.out.println("Cantidad inválida."); continue; }
                         if (cantidad <= 0) { System.out.println("Error: La cantidad debe ser mayor a 0."); continue; }
 
-                        // Calcular stock acumulado si ya se ingresó el mismo producto en el carrito
+                        // Calcular stock acumulado si ya se ingresó el mismo producto en el carrito: si el stock no es suficiente se vuelve a iniciar el bucle (con el uso de continue)
                         int cantYaCargada = carrito.stream().filter(item -> item.productoId.equals(idProd)).mapToInt(item -> item.cantidad).sum();
                         if ((cantidad + cantYaCargada) > prod.getStock()) {
                             System.out.println("Error: Stock insuficiente. Stock disponible: " + prod.getStock());
                             continue;
                         }
 
-                        // Pasar validaciones -> Guardar en Memoria Temporal
+                        // ¿El producto pasa todas las validaciones? -> Se guarda en la Lista Temporal
                         carrito.add(new ItemTemporal(idProd, cantidad));
                         System.out.println("¡Producto añadido temporalmente!");
 
-                        System.out.print("¿Desea agregar otro producto? (S/N): ");
-                        String resp = scanner.nextLine().trim().toUpperCase();
-                        if (resp.equals("N")) continuarAgregando = false;
+                        while (true) {
+                            System.out.print("¿Desea agregar otro producto? (S/N): ");
+                            String res = scanner.nextLine().trim().toUpperCase();
+                            if (res.equalsIgnoreCase("n")) {
+                                continuarAgregando = false;
+                                break;
+                            } else if (res.equalsIgnoreCase("s")) {
+                                continuarAgregando = true;
+                                break;
+                            } else {
+                                System.out.println("Opción inválida. Por favor, ingrese S para Sí o N para No.");
+                            }
+                        }
 
                     } while (continuarAgregando);
 
+                    //Si se eligió no agregar productos: se sale del flujo con un break
                     if (carrito.isEmpty()) {
                         System.out.println("El pedido debe tener al menos un detalle. Operación cancelada.");
                         break;
                     }
 
-                    // 4. PERSISTENCIA EN TRANSACCIÓN ÚNICA MANUAL
+                    //----------------------------------------------------------------------------------------------------
+
+                    // PERSISTENCIA EN TRANSACCIÓN ÚNICA MANUAL
                     // Se usa la fábrica de managers de la app directamente para abrir uno limpio
                     EntityManager emManual = JPAUtil.getEntityManagerFactory().createEntityManager();
                     try {
@@ -698,12 +775,13 @@ public class Main {
 
                         // Instanciar Pedido limpio
                         Pedido nuevoPedido = Pedido.builder()
-                                .fecha(java.time.LocalDate.now())
+                                .fecha(LocalDate.now())
                                 .estado(Estado.PENDIENTE)
                                 .formaPago(formaPago)
                                 .build();
 
                         System.out.println("\nProcesando y verificando stock final en base de datos...");
+
                         for (ItemTemporal item : carrito) {
                             // Recuperar el producto gestionado bajo este EntityManager actual
                             Producto prodGestionado = emManual.find(Producto.class, item.productoId);
@@ -716,7 +794,7 @@ public class Main {
                             // addDetallePedido internamente instancia DetallePedido, calcula subtotal y lo asocia
                             nuevoPedido.addDetallePedido(item.cantidad, prodGestionado);
 
-                            // Modificar stock (El Dirty Checking lo impactará de forma automática en el commit)
+                            // Modificar stock (El Dirty Checking lo impacta de forma automática en el commit: no hace falta merge() explícito)
                             prodGestionado.setStock(prodGestionado.getStock() - item.cantidad);
                         }
 
@@ -742,7 +820,7 @@ public class Main {
                         System.out.println("Forma de Pago: " + nuevoPedido.getFormaPago());
                         System.out.println("-----------------------------------------");
                         System.out.println("Detalles del pedido:");
-                        nuevoPedido.getDetalles().forEach(d -> System.out.println("  - " + d.getProducto().getNombre() + " x" + d.getCantidad() + " | Subtotal: $" + d.getSubtotal()));
+                        nuevoPedido.getDetalles().forEach(d -> System.out.println("-"+ d));
                         System.out.println("-----------------------------------------");
                         System.out.println("TOTAL DEL PEDIDO: $" + nuevoPedido.getTotal());
 
@@ -758,13 +836,17 @@ public class Main {
                         }
                     }
                     break;
+                    }
 
                 case 2: // CAMBIAR ESTADO
                     System.out.print("Ingrese ID del pedido a modificar: ");
                     try {
                         Long idEst = Long.parseLong(scanner.nextLine());
                         Optional<Pedido> optP = pedidoRepo.buscarPorId(idEst);
-                        if (optP.isEmpty()) { System.out.println("Pedido no encontrado o inactivo."); break; }
+                        if (optP.isEmpty()) {
+                            System.out.println("Pedido no encontrado o inactivo.");
+                            break;
+                        }
                         Pedido p = optP.get();
 
                         System.out.println("Estado actual: " + p.getEstado());
@@ -773,8 +855,8 @@ public class Main {
                         Estado nuevoEstado = Estado.valueOf(nestStr);
 
                         p.setEstado(nuevoEstado);
-                        pedidoRepo.guardar(p); // Llama al baseRepository que procesará con merge()
-                        System.out.println("¡Estado del pedido actualizado con éxito!");
+                        Pedido pedidoModificado = pedidoRepo.guardar(p);
+                        System.out.println("¡Estado del pedido actualizado con éxito! Pedido #" + pedidoModificado.getId() + " ahora tiene el estado " + pedidoModificado.getEstado());
                     } catch (Exception e) {
                         System.out.println("Error al cambiar estado: entrada inválida o estado no soportado.");
                     }
@@ -785,8 +867,12 @@ public class Main {
                     try {
                         Long idBaja = Long.parseLong(scanner.nextLine());
                         Optional<Pedido> optP = pedidoRepo.buscarPorId(idBaja);
-                        if (optP.isEmpty()) { System.out.println("Error: El pedido no existe."); break; }
+                        if (optP.isEmpty()) {
+                            System.out.println("Error: El pedido no existe.");
+                            break;
+                        }
                         Pedido ped = optP.get();
+                        Double totalPedido = ped.getTotal();
 
                         if (ped.getEstado() == Estado.TERMINADO) {
                             System.out.println("Error: No se puede dar de baja lógica un pedido en estado TERMINADO.");
@@ -794,7 +880,9 @@ public class Main {
                         }
 
                         if (pedidoRepo.eliminarLogico(idBaja)) {
-                            System.out.println("Baja lógica confirmada exitosamente para el Pedido #" + idBaja);
+                          System.out.println("Baja lógica confirmada exitosamente para el Pedido #" + idBaja + " con un total de $"+totalPedido );
+                        }else{
+                            System.out.println("Error: el pedido no fue eliminado.");
                         }
                     } catch (NumberFormatException e) {
                         System.out.println("ID inválido.");
@@ -802,20 +890,49 @@ public class Main {
                     break;
 
                 case 4: // LISTADO GENERAL DE ACTIVOS
-                    List<Pedido> activos = pedidoRepo.listarActivos();
-                    if (activos.isEmpty()) {
-                        System.out.println("No hay pedidos activos registrados.");
-                    } else {
-                        System.out.println("\n--- LISTADO GENERAL DE PEDIDOS ---");
-                        activos.forEach(p -> System.out.println("ID: " + p.getId() + " | Fecha: " + p.getFecha() + " | Estado: " + p.getEstado() +" | Forma de pago: " + p.getFormaPago() + " | Total: $" + p.getTotal()));
+                {
+                    System.out.println("\n--- LISTADO GENERAL DE PEDIDOS ---");
+                    EntityManager emListado = JPAUtil.getEntityManagerFactory().createEntityManager();
+                    try {
+                        // Consultamos directamente los Pedidos, pero cruzamos con Usuario en el WHERE
+                        // usando la colección del elemento para saber a quién le pertenece.
+                        String jpql = "SELECT p, u FROM Usuario u JOIN u.pedidos p WHERE u.eliminado = false AND p.eliminado = false ORDER BY p.id ASC";
+                        List<Object[]> resultados = emListado.createQuery(jpql, Object[].class).getResultList();
+
+                        if (resultados.isEmpty()) {
+                            System.out.println("No hay pedidos registrados.");
+                        } else {
+                            for (Object[] fila : resultados) {
+                                Pedido p = (Pedido) fila[0];
+                                Usuario u = (Usuario) fila[1];
+
+                                System.out.println("Pedido #" + p.getId() +
+                                        " | Fecha: " + p.getFecha() +
+                                        " | Cliente: " + u.getApellido() + ", " + u.getNombre() +
+                                        " | Total: $" + p.getTotal() +
+                                        " | Estado: " + p.getEstado());
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error al generar el listado: " + e.getMessage());
+                    } finally {
+                        if (emListado != null && emListado.isOpen()) {
+                            emListado.close();
+                        }
                     }
                     break;
+                }
 
                 case 5: // PEDIDOS POR USUARIO
-                    usuarios = usuarioRepo.listarActivos();
-                    if (usuarios.isEmpty()) { System.out.println("No hay usuarios activos."); break; }
-                    usuarios.forEach(u -> System.out.println("  [" + u.getId() + "] " + u.getNombre() + " " + u.getApellido()));
+                {
+                    List<Usuario> usuariosActivos = usuarioRepo.listarActivos();
+                    if (usuariosActivos.isEmpty()) {
+                        System.out.println("No hay usuarios activos.");
+                        break;
+                    }
+                    usuariosActivos.forEach(u -> System.out.println("  [" + u.getId() + "] " + u.getNombre() + " " + u.getApellido()));
                     System.out.print("Seleccione ID de Usuario: ");
+
                     try {
                         Long uid = Long.parseLong(scanner.nextLine());
                         List<Pedido> pUser = usuarioRepo.buscarPedidosPorUsuario(uid);
@@ -825,23 +942,30 @@ public class Main {
                             System.out.println("\nPedidos del usuario seleccionado:");
                             pUser.forEach(p -> System.out.println("  -> Pedido #" + p.getId() + " | Fecha: " + p.getFecha() + " | Estado: " + p.getEstado() + " | Total: $" + p.getTotal()));
                         }
-                    } catch (NumberFormatException e) { System.out.println("ID inválido."); }
+                    } catch (NumberFormatException e) {
+                        System.out.println("ID inválido.");
+                    }
                     break;
+                }
 
                 case 6: // PEDIDOS POR ESTADO
+                {
                     System.out.print("Ingrese el estado a filtrar (PENDIENTE, CONFIRMADO, TERMINADO, CANCELADO): ");
                     String estStr = scanner.nextLine().trim().toUpperCase();
                     try {
-                        Estado est = Estado.valueOf(estStr);
-                        List<Pedido> pEst = pedidoRepo.buscarPorEstado(est);
-                        if (pEst.isEmpty()) {
-                            System.out.println("No se encontraron pedidos en ese estado.");
+                        Estado estadoFiltro = Estado.valueOf(estStr);
+                        List<Pedido> pedidosEstado = pedidoRepo.buscarPorEstado(estadoFiltro);
+                        if (pedidosEstado.isEmpty()) {
+                            System.out.println("No se encontraron pedidos activos con el estado: " + estadoFiltro);
                         } else {
-                            System.out.println("\nPedidos con estado " + est + ":");
-                            pEst.forEach(p -> System.out.println("  -> Pedido #" + p.getId() + " | Total: $" + p.getTotal() + " | Pago: " + p.getFormaPago()));
+                            System.out.println("\nPedidos con estado " + estadoFiltro + ":");
+                            pedidosEstado.forEach(p -> System.out.println("  -> Pedido #" + p.getId() + " | Fecha: " + p.getFecha() + " | Total: $" + p.getTotal() + " | Pago: " + p.getFormaPago()));
                         }
-                    } catch (IllegalArgumentException e) { System.out.println("Estado inválido."); }
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Estado de pedido inválido.");
+                    }
                     break;
+                }
 
                 case 0:
                     System.out.println("Retornando al menú principal...");
@@ -860,9 +984,10 @@ public class Main {
         int opcion;
         do {
             System.out.println("\n--- SUBMENÚ REPORTES Y CONSULTAS ---");
-            System.out.println("1. Buscar pedidos de un usuario");
-            System.out.println("2. Buscar pedidos por estado");
-            System.out.println("3. Calcular total facturado (Pedidos TERMINADOS)");
+            System.out.println("1. Buscar productos por categoria");
+            System.out.println("2. Buscar pedidos de un usuario");
+            System.out.println("3. Buscar pedidos por estado");
+            System.out.println("4. Calcular total facturado (Pedidos TERMINADOS)");
             System.out.println("0. Volver");
             System.out.print("Seleccione una opción: ");
             try {
@@ -872,18 +997,65 @@ public class Main {
             }
 
             switch (opcion) {
-                case 1: // PEDIDOS POR USUARIO
-                    List<Usuario> usuarios = usuarioRepo.listarActivos();
-                    if (usuarios.isEmpty()) { System.out.println("No hay usuarios activos."); break; }
-                    usuarios.forEach(u -> System.out.println("  [" + u.getId() + "] " + u.getNombre() + " " + u.getApellido()));
+                case 1: // PRODUCTOS POR CATEGORIA
+                    List<Categoria> categoriasActivas = categoriaRepo.listarActivos();
+                    if (categoriasActivas.isEmpty()) {
+                        System.out.println("No hay categorías activas registradas en el sistema.");
+                        break;
+                    }
+
+                    System.out.println("\n--- Categorías Activas ---");
+                    categoriasActivas.forEach(c -> System.out.println("  [" + c.getId() + "] " + c.getNombre() + (c.getDescripcion() != null ? " - " + c.getDescripcion() : "")));
+
+                    System.out.print("Seleccione el ID de la categoría: ");
+
+                    try {
+                        Long idCat = Long.parseLong(scanner.nextLine());
+
+                        // Validamos que el ID corresponda a una categoría activa de la lista
+                        boolean existeCat = categoriasActivas.stream().anyMatch(c -> c.getId().equals(idCat));
+                        if (!existeCat) {
+                            System.out.println("Error: El ID seleccionado no corresponde a una categoría activa.");
+                            break;
+                        }
+                        String categoriaSeleccionada = categoriaRepo.buscarPorId(idCat).get().getNombre();
+
+                        List<Producto> productosCat = categoriaRepo.buscarProductosPorCategoria(idCat);
+
+                        if (productosCat.isEmpty()) {
+                            System.out.println("No hay productos activos en esa categoría.");
+                        } else {
+                            System.out.println("\n--- Productos de la categoria "+ categoriaSeleccionada +" ---");
+                            for (Producto p : productosCat) {
+                                System.out.println("ID: " + p.getId() +
+                                        " | Nombre: " + p.getNombre() +
+                                        " | Precio: $" + p.getPrecio() +
+                                        " | Stock: " + p.getStock());
+                            }
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("ID de categoria inválido.");
+                    }
+                    break;
+
+                case 2: // PEDIDOS POR USUARIO
+                    List<Usuario> usuariosListados = usuarioRepo.listarActivos();
+                    if (usuariosListados.isEmpty()) {
+                        System.out.println("No hay usuarios activos.");
+                        break;
+                    }
+                    usuariosListados.forEach(u -> System.out.println("  [" + u.getId() + "] " + u.getNombre() + " " + u.getApellido()));
 
                     System.out.print("Seleccione el ID del usuario: ");
                     try {
                         Long uId = Long.parseLong(scanner.nextLine());
                         Optional<Usuario> userOpt = usuarioRepo.buscarPorId(uId);
-                        if (userOpt.isEmpty()) { System.out.println("Usuario inválido."); break; }
-
+                        if (userOpt.isEmpty()) {
+                            System.out.println("Usuario inválido.");
+                            break;
+                        }
                         List<Pedido> pedidosUser = usuarioRepo.buscarPedidosPorUsuario(uId);
+
                         if (pedidosUser.isEmpty()) {
                             System.out.println("El usuario " + userOpt.get().getNombre() + " no registra pedidos activos.");
                         } else {
@@ -895,7 +1067,7 @@ public class Main {
                     }
                     break;
 
-                case 2: // PEDIDOS POR ESTADO
+                case 3: // PEDIDOS POR ESTADO
                     System.out.print("Ingrese el estado a filtrar (PENDIENTE, CONFIRMADO, TERMINADO, CANCELADO): ");
                     String estStr = scanner.nextLine().trim().toUpperCase();
                     try {
@@ -912,7 +1084,7 @@ public class Main {
                     }
                     break;
 
-                case 3: // TOTAL FACTURADO (REQUISITO ESTRICTO DE REPRESENTACIÓN MONETARIA)
+                case 4: // TOTAL FACTURADO (REQUISITO ESTRICTO DE REPRESENTACIÓN MONETARIA)
                     // Buscamos todos los pedidos en estado TERMINADO
                     List<Pedido> pedidosTerminados = pedidoRepo.buscarPorEstado(Estado.TERMINADO);
 
