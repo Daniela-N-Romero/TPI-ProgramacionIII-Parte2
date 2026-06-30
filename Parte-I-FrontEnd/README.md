@@ -1,7 +1,7 @@
 # TPI PROGRAMACIÓN III
 ## 🍕 Food Store - Sistema de Gestión de Pedidos de Comida
 
-### 🎓 Datos del Alumno
+### 🎓 Datos de la alumna
 * **Nombre:** Daniela Nahir Romero
 * **Carrera:** Tecnicatura Universitaria en Programación (TUPaD)
 * **DNI:** N° 38.440.237
@@ -10,7 +10,7 @@
 ---
 
 ## ✍️ Descripción del Proyecto
-Este proyecto es una aplicación web multipágina orientada al comercio gastronómico, desarrollada de manera agnóstica y modular utilizando **Vite** y **TypeScript** en el Frontend, utilizando Local y Session Storage para persistencia de datos. 
+Este proyecto es una aplicación web multipágina orientada al comercio gastronómico, desarrollada de manera modular utilizando **Vite** y **TypeScript** en el Frontend, utilizando Local y Session Storage para persistencia de datos. 
 
 El sistema divide los privilegios de navegación de forma estricta mediante roles (`ADMIN` y `USUARIO`), además de proveer una experiencia fluida de consulta interactiva para usuarios no registrados bajo un esquema de sesión abierta de lectura.
 
