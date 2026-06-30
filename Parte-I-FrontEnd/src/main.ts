@@ -2,13 +2,6 @@ import { getActiveUser } from "./utils/storage/userStorage.ts"
 import { rolRedirect  } from "./utils/auth/auth.ts";
 import {navigate} from "./utils/guards/guards.ts"
 
-//LISTA DE TO DO 
-
-// -verificar comentarios
-// -verificar estilos y estilos en linea
-// -completar el ReadME. urgente
-// -hacer pruebas
-
 document.addEventListener('DOMContentLoaded', () => {
     
  

@@ -1,7 +1,6 @@
 :root {
     --card-bg: #ffffff;
-    --primary-color: #ff6b4a;
-    /* El naranja de los botones y logo */
+    --primary-color: #ff6b4a;    /* El naranja de los botones y logo */
     --primary-hover: #e05638;
     --secondary-color: #2b2d42;
     /* Textos principales */
@@ -10,12 +9,9 @@
     --bg-white: #ffffff;
     --border-color: #e2e8f0;
     --text-muted: #718096;
-    --accent-green: #00bfa6;
-    /* Color de "Disponible" o "Confirmar" */
-    --accent-red: #d90429;
-    /* Botón Vaciar Carrito / Eliminar */
-    --accent-yellow: #ffb703;
-    /* Estado Pendiente */
+    --accent-green: #00bfa6;    /* Color de "Disponible" o "Confirmar" */
+    --accent-red: #d90429;    /* Botón Vaciar Carrito / Eliminar */
+    --accent-yellow: #ffb703;    /* Estado Pendiente */
     --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --radius: 8px;
 }
@@ -426,7 +422,6 @@ a:hover {
 }
 
 /* Home Store */
-/* TO DO Check styles */
 
 .store-controls {
     display: flex;
@@ -636,7 +631,6 @@ a:hover {
 }
 
 /* ESTILOS DETALLE PEDIDO */
-/*  TO DO Check styles */
 
 /* ==========================================
    VISTA DETALLE DE PRODUCTO
@@ -1174,6 +1168,11 @@ a:hover {
     background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
 }
 
+.loading-text{
+    color: var(--text-muted); 
+    margin-top: 10px;
+}
+
 .stat-info .icon {
     font-size: 1.5rem;
 }
@@ -1350,7 +1349,9 @@ a:hover {
 
 
 .order-actions{
+    margin-top: 1rem;
     display: flex;
+    justify-content: space-between;
 }
 
 .status-badge {
@@ -1358,7 +1359,10 @@ a:hover {
     border-radius: 15px;
     font-size: .9rem;
     font-weight: bold;
+    background: #feebc8; 
+    color: #dd6b20;
 }
+
 
 .order-id,
 .order-total {
@@ -1372,31 +1376,31 @@ a:hover {
 }
 
 .status-pendiente {
-    background-color: #ffeaa7;
-    color: #d63031;
+    background-color: #fadc56;
+    color: #e28316;
 }
 
 .status-confirmado {
-    background-color: #81ecec;
-    color: #00b894;
+    background: #ebf8ff; 
+    color: #2b6cb0;
 }
 
-.status-en_preparacion {
+.status-cancelado {
     background-color: #74b9ff;
-    color: #0984e3;
+    color: #f13202;
 }
 
-.status-entregado {
+.status-terminado {
     background-color: #55efc4;
     color: #00b894;
 }
 
 /* select del admin */
-.status-selector {
+#status-filter, .status-selector {
     padding: 6px;
     border-radius: 4px;
     border: 1px solid #ccc;
-    width: 100%;
+    width: 200px;
     margin-top: 5px;
 }
 

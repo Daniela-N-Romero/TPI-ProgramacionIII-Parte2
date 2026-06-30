@@ -15,5 +15,5 @@ export interface IOrder {
     usuarioDto: IUserDTO;
 }
 
-export type Estado = "EN_PREPARACION" | "CONFIRMADO" | "PENDIENTE" | "ENTREGADO";
+export type Estado = "CANCELADO" | "CONFIRMADO" | "PENDIENTE" | "TERMINADO";
 export type FormaPago = "TRANSFERENCIA" | "EFECTIVO" | "TARJETA" ;

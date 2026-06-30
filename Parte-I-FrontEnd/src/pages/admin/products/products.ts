@@ -71,7 +71,7 @@ const refrescarTablaProductos = () => {
       <td><span class="badge-category">${prod.categoria?.nombre || 'Sin categoría'}</span></td>
       <td>${prod.stock} u.</td>
       <td>
-        <span class="status-badge ${prod.disponible ? 'status-entregado' : 'status-pendiente'}">
+        <span class="status-badge ${prod.disponible ? 'status-terminado' : 'status-pendiente'}">
           ${prod.disponible ? 'Disponible' : 'No disp.'}
         </span>
       </td>

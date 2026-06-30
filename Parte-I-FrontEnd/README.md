@@ -1,134 +1,105 @@
-# Proyecto: Protección de Rutas (Educativo)
+# TPI PROGRAMACIÓN III
+## 🍕 Food Store - Sistema de Gestión de Pedidos de Comida
 
-## ✍️ Descripción
+### 🎓 Datos del Alumno
+* **Nombre:** Daniela Nahir Romero
+* **Carrera:** Tecnicatura Universitaria en Programación (TUPaD)
+* **DNI:** N° 38.440.237
+* **Comisión:** N° 15
 
-Este es un proyecto de demostración creado con fines educativos para ilustrar un mecanismo básico de protección de rutas en el lado del cliente (frontend) utilizando **Vite** y **TypeScript**.
+---
 
-El objetivo es mostrar cómo se puede restringir el acceso a ciertas páginas según el rol de un usuario (por ejemplo, `ADMIN` o `CLIENT`).
+## ✍️ Descripción del Proyecto
+Este proyecto es una aplicación web multipágina orientada al comercio gastronómico, desarrollada de manera agnóstica y modular utilizando **Vite** y **TypeScript** en el Frontend, utilizando Local y Session Storage para persistencia de datos. 
+
+El sistema divide los privilegios de navegación de forma estricta mediante roles (`ADMIN` y `USUARIO`), además de proveer una experiencia fluida de consulta interactiva para usuarios no registrados bajo un esquema de sesión abierta de lectura.
 
 ---
 
 ## 🔑 Credenciales de Prueba 
-El sistema puede ser recorrido de diferente manera según el rol del usuario. Si se navega sin logearse puede accederse a la pantalla de inicio, la tienda principal, al login y al registro. En cambio, si se hace un logueo el rol del usuario determinara las páginas que serán visibles. 
-El mapa de rutas permitidas para cada tipo de usuario se encuentra en el arvivo `guards.ts`.
 
-Para comenzar con las pruebas se pueden utilizar los usuarios que se traen del JSON original. 
+### 👤 Perfil Cliente
+* **Email:** `cliente@food.com`
+* **Password:** `cliente123`
 
-- Usuario Administrador:    admin@admin.com / admin123
-- Usuario común:            cliente@food.com / cliente123
+### 👑 Perfil Administrador
+* **Email:** `admin@admin.com`
+* **Password:** `admin123`
 
-Por otro lado, el registro de usuarios genera usuarios comunes. En esta etapa de desarrollo no se incluye la posibilidad de crear más usuarios administradores.
+## 🔑 Ciclo de vida del Usuario 
 
-## ⚠️ ¡Importante! Nivel de Seguridad
+El sistema implementa el uso de localStorage por motivos pedagógicos para persistir y destruir la sesión del usuario conectado:
 
-La protección de rutas implementada en este proyecto **NO ES SEGURA** y no debe utilizarse en un entorno de producción.
+- *Inicio de Sesión (loggedIn = true)*: Al autenticarse con éxito, se genera un objeto de estado en el localStorage bajo la clave userData. Este objeto no solo almacena el perfil del usuario (aunque omite intencionalmente su contraseña), sino que incorpora la bandera explícita loggedIn: true. Esta bandera es consultada por los sistemas de protección de rutas antes de renderizar cualquier vista sensible. Mediante tambien al acceso del mail del usuario alohado en este objeto, se puede renderizar los pedidos y carrito del usuario logueado. 
 
-- **Razón**: La lógica de autenticación se basa en datos guardados en `localStorage` en el navegador del usuario.
-- **Riesgo**: Cualquier usuario con conocimientos técnicos básicos puede abrir las herramientas de desarrollador del navegador para inspeccionar, modificar o eliminar los datos de `localStorage`, obteniendo así acceso no autorizado a rutas protegidas.
-
-Este enfoque es útil únicamente para fines de aprendizaje y para prototipos de bajo riesgo. La seguridad real debe implementarse en el **backend**.
+- *Cierre de Sesión (Destrucción Segura)*: Al presionar el botón de Cierre de Sesión administrado por el layout, el sistema ejecuta la remoción completa de la clave userData del localStorage (haciendo un borrado limpio), redirigiendo de inmediato al visitante a la pantalla de Login y bloqueando cualquier intento de navegación hacia atrás en el historial.
 
 ---
 
-## 🚀 Instalación y Uso
+## 🛠️ Instalación y Configuración del Entorno
 
-Se recomienda usar `pnpm` como gestor de paquetes para mayor eficiencia en el manejo de dependencias.
+La aplicación utiliza `pnpm` como gestor de paquetes para optimizar tiempos de instalación y eficiencia de dependencias en el entorno local.
 
-### 1. Instalar pnpm
-
-Si no tienes `pnpm` instalado, puedes hacerlo fácilmente a través de `npm` (que viene con Node.js) ejecutando el siguiente comando en tu terminal:
-
+### 1. Clonar el repositorio e instalar dependencias
 ```bash
 npm install -g pnpm
-```
-
-### 2. Instalar Dependencias del Proyecto
-
-Una vez en la carpeta raíz del proyecto, instala las dependencias necesarias con `pnpm`:
-
-```bash
 pnpm install
+pnpm run dev
 ```
-
-### 3. Ejecutar el Proyecto
-
-Para iniciar el servidor de desarrollo de Vite, ejecuta:
-
-```bash
-pnpm dev
-```
-
-La aplicación estará disponible en la URL que aparezca en la terminal (generalmente `http://localhost:5173`).
 
 ---
 
-## ⚙️ ¿Cómo Funciona la Protección de Rutas?
+## 🎯 Características y Requisitos del Sistema
 
-El mecanismo es simple y se gestiona desde el código TypeScript en la carpeta `src/utils`:
+La solución cubre de extremo a extremo los flujos principales del módulo Frontend del Trabajo Práctico Integrador:
 
-1.  **Inicio de Sesión**: Cuando un usuario se "loguea", su información (incluido su rol) se guarda como un string JSON en `localStorage`.
-2.  **Carga de Página Protegida**: Cada vez que se intenta cargar una página protegida (ej. la página de Administrador), se ejecuta la verificación... //TO DO explicar como. 
-3.  **Verificación**: El script comprueba:
-    - Si existe un usuario en `localStorage`. Si no, redirige al login.
-    - Si el rol del usuario guardado coincide con el rol requerido para acceder a esa página. Si no coincide, lo redirige a una página de acceso denegado o a su "home" correspondiente.
-4.  **Cierre de Sesión (Logout)**: Al cerrar sesión, la información del usuario se elimina de `localStorage`.
+- **Autenticación Adaptativa**: Formulario de inicio de sesión con enrutamiento inteligente basado en roles.
 
+- **Uso Asincronía y Fetch**: Todas las cargas iniciales de datos se realizan mediante peticiones asíncronas (async/await) utilizando la API fetch nativa apuntando a los archivos estáticos de datos (/data/productos.json, /data/categorias.json, /data/pedidos.json y /data/usuarios.json). No existen datos duros (hardcodeados) en las vistas.
+
+- **Catálogo de Productos Dinámico**: Renderizado asíncrono con filtros combinados por categorías, búsquedas en tiempo real por texto y ordenamientos múltiples (A-Z, Z-A, Precios).
+
+- **Módulo de Carrito Autónomo**: Reglas de validación en tiempo real que restringen la agregación según el stock disponible remanente del producto, cálculo exacto de subtotales por fila y desgloses de costos del pedido.
+
+- **Historial de Compras de Clientes**: Listado unificado con badges visuales de estado y modales detallados de transacciones previas.
+
+- **Panel Administrativo Global (Dashboard)**: Visualización general de métricas financieras, administración interactiva con cambio de estados de pedidos en tiempo real mediante menús selectores y CRUDs en memoria de productos y categorías.
 ---
+## 🚀 Optimizaciones de Arquitectura y "Toques Especiales" (Valor Agregado)
 
-## 📁 Estructura del Proyecto
+Más allá de los lineamientos mínimos solicitados por la cátedra, se diseñó e implementó una infraestructura robusta orientada a **emular el comportamiento de una arquitectura escalable** de nivel empresarial:
 
+1. **Refactorización Integral de Capas de Almacenamiento (storageBase.ts)**: 
 
-//TO DO : actualizar
-```
-/
-├── src/
-│   ├── pages/                # Contiene las páginas de la aplicación
-│   │   ├── admin/            # Páginas solo para administradores
-│   │   ├── auth/             # Páginas de autenticación (login, registro)
-│   │   └── client/           # Páginas solo para clientes
-│   ├── types/                # Define las interfaces y tipos (IUser, Rol)
-│   └── utils/                # Lógica reutilizable
-│       ├── auth.ts           # Función principal de verificación de rol y sesión
-│       ├── localStorage.ts   # Funciones para leer/escribir en localStorage
-│       └── navigate.ts       # Función para redirigir al usuario
-├── package.json              # Dependencias y scripts
-└── README.md                 # Este archivo
-```
+   Se migró la lógica de lectura y escritura a un motor genérico y reutilizable basado en Tipos Avanzados de TypeScript, al cual se denomino 'storageBase'. Esta abstracción centraliza las operaciones de persistencia, autoincrementa IDs y unifica la lógica de altas, bajas lógicas y modificaciones sin duplicar código en los distintos módulos (productStorage, categoryStorage, orderStorage).
 
-## 💾 Gestión de Persistencia y Datos Híbridos (Frontend Autónomo)
+2. **Tratamiento Híbrido Estricto (localStorage vs. sessionStorage)**
+   Para cumplir la consigna pedagógica (no modificar los archivos JSON, persistir cambios en memoria, y guardar datos en LocalStorage) sin perder coherencia entre múltiples archivos .html, se dividió la persistencia:
+   
+   - _localStorage (Persistencia Estricta)_: Guarda de manera inmutable el usuario activo (userData), los carritos de compra (cart_{email}) y el histórico de órdenes completadas del cliente (orders_{email}). Soporta recargas duras (F5) sin pérdida de datos.
+   
+   - _sessionStorage (Persistencia Volátil/Transitoria)_: Almacena el catálogo de productos modificados, categorías y el panel global del Admin. Permite alterar los datos dinámicamente entre vistas de Vite, pero se destruye y limpia al cerrar la pestaña o recargar el sitio para re-importar los JSON limpios originales de la cátedra.
 
-Para cumplir estrictamente con los requerimientos de la cátedra, el sistema implementa una capa de persistencia simulada e independiente mediante almacenamiento web (`localStorage` y `sessionStorage`). El frontend es 100% autónomo y consume archivos `.json` locales usando la API `fetch`, quedando preparado para que en una iteración posterior estos métodos sean reemplazados por llamadas a una API REST real.
+3. **Seguridad Perimetral: Guards y Mapa de Rutas de Acceso**
 
-### 🔄 Arquitectura de Almacenamiento Dinámico
+      Se implementó una capa defensiva modular (guards.ts) conectada a un mapa de rutas estricto. *Cada vista .html ejecuta un validador en su inicialización que intercepta el acceso indebido*: si un usuario estándar intenta forzar la URL hacia el panel /admin/, o si un administrador intenta acceder al flujo de checkout del carrito, el guard bloquea la carga del DOM y redirige inmediatamente al usuario a su Home correspondiente.
 
-No todos los datos se comportan de la misma manera en la aplicación. Por lo tanto, se diseñó un interceptor centralizado en `storageBase.ts` que deriva dinámicamente el destino de la persistencia según la clave de acceso (*Storage Key*):
+4. **Modo Invitado (Recorrido Abierto de Tienda)**
 
-1. **Persistencia Transitoria (`sessionStorage` / "En Memoria"):**
-   - **Entidades:** Catálogo de productos (`products`), categorías (`categories`), listado global de usuarios (`users`) y el panel de administración de pedidos del Admin (`orders`).
-   - **Comportamiento:** Se mantiene la integridad de los datos (altas, bajas lógicas y modificaciones) al navegar entre los diferentes archivos físicos `.html` del entorno multipágina de **Vite**. Sin embargo, **al presionar F5 o recargar la pestaña, los cambios se destruyen**, forzando al sistema a re-importar los JSON limpios originales (cumpliendo con la consigna de *modificaciones en memoria*).
+      Se diseñó un flujo de experiencia de usuario flexible donde los visitantes no autenticados pueden ingresar a la tienda, visualizar los productos y filtrar por categorías. Sin embargo, al momento de intentar presionar el botón "🛒 Agregar al Carrito", el sistema detiene la propagación del evento, resguarda el flujo y redirige al usuario a la vista de login de forma automática.
 
-2. **Persistencia Estricta (`localStorage`):**
-   - **Entidades:** Sesión activa del usuario (`userData`), carritos de compra (`cart_{email}`) e historial de confirmaciones de los clientes (`orders_{email}`).
-   - **Comportamiento:** Los datos se guardan permanentemente en el disco local del navegador del usuario. Sobreviven a cierres de sesión o recargas completas (F5), garantizando que el historial del cliente no se borre.
+5. **Utilización del Método Centralizado obtenerEstadoCliente**
+   
+   Para evitar lecturas redundantes al storage y prevenir inconsistencias, se centralizó el estado de la sesión en la función obtenerEstadoCliente(). Este ayudante computa en tiempo real tres banderas booleanas clave a lo largo de toda la aplicación: isInvitado, isUsuario y isAdmin, simplificando las condicionales lógicas de renderizado y las validaciones de botones.
 
----
+6. **Centralización de Layout Dinámico mediante layout.ts**
 
-### ⏳ Inicialización Automática Bajo Demanda (Lazy Loading)
+      Se eliminó la duplicación masiva de código HTML estructural implementando un inyector dinámico en layout.ts. Este script lee el estado del usuario activo y dibuja de forma automatizada tanto el Header principal como la Sidebar lateral, mutando visualmente los enlaces de navegación accesibles, actualizando el indicador numérico del carrito (badge) y manejando la destrucción de la sesión de manera segura.
 
-Para resolver el problema de los múltiples puntos de entrada en entornos de desarrollo multi-página con Vite, se eliminó el proceso de carga masiva en el `main.ts`. En su lugar, el archivo `storageBase.ts` maneja la inicialización de forma asíncrona y perezosa:
+7. **Inicialización Asíncrona "Bajo Demanda": Fetch Semilla**
 
-- Cada vez que una sección requiere datos (ej. al listar la tienda), se invoca `getElementsFromStorage`.
-- Esta función evalúa en tiempo de ejecución si la clave correspondiente ya tiene información en su respectivo storage.
-- Si está vacía (por ser el primer ingreso o tras pulsar F5), interrumpe el flujo un microsegundo, gatilla de manera automática e interna la función asíncrona de `fetch()` hacia el archivo `.json`, impacta el resultado en el almacenamiento correspondiente y renderiza la vista. Si ya existían datos, omite el fetch para no consumir recursos innecesarios.
+   Para resolver el desfase de carga que provoca el entorno multipágina de Vite, se desarrolló la función de verificación asíncrona verificarFetchSemilla dentro del ciclo del storage base. En lugar de forzar cargas masivas pesadas en el archivo raíz main.ts, el sistema evalúa dinámicamente si el almacenamiento carece de información en el instante preciso en que una vista solicita los datos. De estar vacío, gatilla de forma perezosa e interna el fetch() hacia el archivo .json correspondiente, siembra el storage local y renderiza la pantalla de forma transparente sin interrumpir la UX.
 
----
+8. **Motor de Modales y Alertas Personalizadas (ModalService y AlertService)**
 
-### 🔀 Flujo Unificado en Pedidos (Admin vs. Cliente)
-
-Un desafío clave de la consigna fue conectar el pedido persistente del cliente con la gestión transitoria del Administrador. Se solucionó mediante la función `registrarNuevoPedidoDelCliente`:
-- Cuando un cliente realiza el *checkout*, el sistema registra el objeto pedido en su historial persistente (`orders_{email}` en `localStorage`).
-- Simultáneamente, clona dicho objeto y lo inyecta en el array general de órdenes (`orders` en `sessionStorage`) para que el Administrador pueda verlo e interactuar en tiempo real (cambiar su estado, aplicar filtros) desde su panel de control durante el tiempo de vida de la sesión.
-
-### Pedidos
-
-Cada pedido tiene un valor de envio de $500 que se suma al total de la compra. 
+      Se sustituyeron los diálogos nativos y bloqueantes del navegador (alert()) por un servicio unificado de alertas modales estéticas y enriquecidas con estilos CSS adaptados a la paleta de colores del proyecto, mejorando radicalmente la cohesión visual en flujos críticos como faltas de stock, confirmaciones de vaciado de carrito y redirecciones exitosas.

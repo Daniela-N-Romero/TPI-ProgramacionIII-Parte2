@@ -38,8 +38,8 @@ export const renderGestionPedidos = async () => {
           <option value="TODOS">Todos los pedidos</option>
           <option value="PENDIENTE">Pendiente</option>
           <option value="CONFIRMADO">Confirmado</option>
-          <option value="EN_PREPARACION">En Preparación</option>
-          <option value="ENTREGADO">Entregado</option>
+          <option value="TERMINADO">Terminado</option>
+          <option value="CANCELADO">Cancelado</option>
         </select>
       </div>
     </div>
@@ -169,11 +169,11 @@ export const abrirModalDetallePedido = (pedido: IOrder) => {
         <select id="status-${pedido.id}" class="status-selector" data-id="${pedido.id}">
           <option value="PENDIENTE" ${pedido.estado === 'PENDIENTE' ? 'selected' : ''}>PENDIENTE</option>
           <option value="CONFIRMADO" ${pedido.estado === 'CONFIRMADO' ? 'selected' : ''}>CONFIRMADO</option>
-          <option value="EN_PREPARACION" ${pedido.estado === 'EN_PREPARACION' ? 'selected' : ''}>EN_PREPARACION</option>
-          <option value="ENTREGADO" ${pedido.estado === 'ENTREGADO' ? 'selected' : ''}>ENTREGADO</option>
+          <option value="CANCELADO" ${pedido.estado === 'CANCELADO' ? 'selected' : ''}>CANCELADO</option>
+          <option value="TERMINADO" ${pedido.estado === 'TERMINADO' ? 'selected' : ''}>TERMINADO</option>
         </select>
         </div>
-        <button class="save-order">Guardar</button>
+        <button class="save-order btn btn-success">Guardar</button>
       </div>
     </div>
   `;

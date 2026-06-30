@@ -63,15 +63,15 @@ const renderResumen = () => {
         // Inicializamos las métricas de Pedidos agrupados por estado
         let pendientes = 0;
         let confirmados = 0;
-        let enPreparacion = 0;
-        let entregados = 0;
+        let terminados = 0;
+        let cancelados = 0;
 
         pedidos.forEach(pedido => {
             switch (pedido.estado) {
                 case 'PENDIENTE': pendientes++; break;
                 case 'CONFIRMADO': confirmados++; break;
-                case 'EN_PREPARACION': enPreparacion++; break;
-                case 'ENTREGADO': entregados++; break;
+                case 'TERMINADO': terminados++; break;
+                case 'CANCELADO': cancelados++; break;
             }
         });
 
@@ -95,20 +95,20 @@ const renderResumen = () => {
             <strong class="summary-count">${pendientes}</strong>
           </p>
           <p class="summary-item">
-            <span class="status-badge status-confirmado" style="background: #ebf8ff; color: #2b6cb0;">CONFIRMADO</span>
+            <span class="status-badge status-confirmado">CONFIRMADO</span>
             <strong class="summary-count">${confirmados}</strong>
           </p>
           <p class="summary-item">
-            <span class="status-badge" style="background: #feebc8; color: #dd6b20;">EN PREPARACIÓN</span>
-            <strong class="summary-count">${enPreparacion}</strong>
+            <span class="status-badge">EN PREPARACIÓN</span>
+            <strong class="summary-count">${cancelados}</strong>
           </p>
         </div>
 
         <div class="summary-card border-green">
           <h4 class="card-sub-title">✅ Completados</h4>
           <p class="summary-item" style="margin-top: 10px;">
-            <span class="status-badge status-entregado">ENTREGADO</span>
-            <strong class="summary-count-highlight">${entregados}</strong>
+            <span class="status-badge status-terminado">TERMINADO</span>
+            <strong class="summary-count-highlight">${terminados}</strong>
           </p>
           <p class="summary-footer">
             Total histórico: ${pedidos.length} órdenes

@@ -46,8 +46,8 @@ export const renderMisPedidos = async (user: IUserDTO) => {
           <option value="TODOS">Todos los pedidos</option>
           <option value="PENDIENTE">Pendiente</option>
           <option value="CONFIRMADO">Confirmado</option>
-          <option value="EN_PREPARACION">En Preparación</option>
-          <option value="ENTREGADO">Entregado</option>
+          <option value="CANCELADO">Cancelado</option>
+          <option value="TERMINADO">Terminado</option>
         </select>
       </div>
     </div>

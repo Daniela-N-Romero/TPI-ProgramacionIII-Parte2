@@ -1,12 +1,12 @@
 import { obtenerEstadoCliente, navigate, validarAccesoRuta } from "../../../../src/utils/guards/guards";
 import type { IProduct } from "../../../types/IProduct";
 import { actualizarBadgeNavbar } from "../../../utils/layout";
+import { AlertService } from "../../../utils/modals/alert";
 import { addToCart } from "../../../utils/storage/cartStorage";
 import { getProducts } from "../../../utils/storage/productStorage";
 import { getActiveUser } from "../../../utils/storage/userStorage";
 
 
-//TO DO: revisar comentarios
 // VARIABLES DE ESTADO LOCAL (Para combinar filtros y ordenamientos en tiempo real)
 let categoriaSeleccionadaId: number | 'todas' = 'todas';
 let busquedaTexto: string = "";
@@ -17,15 +17,15 @@ const configurarFiltroCategorias = (): void => {
 
   const linksCategoria = document.querySelectorAll('#app-sidebar .sidebar-menu a[data-categoria-id]');
 
-  linksCategoria?.forEach(link => { //agregamos evento de click a categorias en el menu lateral
+  linksCategoria?.forEach(link => { 
     link.addEventListener('click', async (e) => {
       e.preventDefault(); // Evitamos que la página se recargue o scrollee al inicio
-
+      
       const target = e.currentTarget as HTMLAnchorElement;
-      const categoriaIdRaw = target.dataset.categoriaId; //capturamos el id d ela categoria
-
+      const categoriaIdRaw = target.dataset.categoriaId; 
+      
       if (!categoriaIdRaw) return;
-
+      
       // Manejo visual
       linksCategoria.forEach(l => l.parentElement?.classList.remove('active'));
       target.parentElement?.classList.add('active');
@@ -50,18 +50,18 @@ const renderSegunCategoria = async (): Promise<void> => {
   let productos: IProduct[] = await getProducts();
   productos = productos.filter(p => p.disponible === true);
 
-  // A) FILTRADO POR CATEGORÍA
+  // FILTRADO POR CATEGORÍA
   if (categoriaSeleccionadaId !== 'todas') {
     productos = productos.filter(p => p.categoria && p.categoria.id === categoriaSeleccionadaId);
   }
 
-  // B) FILTRADO POR BÚSQUEDA EN TIEMPO REAL (Filtra por nombre sin importar mayúsculas/minúsculas)
+  // FILTRADO POR BÚSQUEDA 
   if (busquedaTexto.trim() !== "") {
     const texto = busquedaTexto.toLowerCase().trim();
     productos = productos.filter(p => p.nombre.toLowerCase().includes(texto));
   }
 
-  // C) ORDENAMIENTO (Mutación controlada en el array filtrado)
+  // ORDENAMIENTO
   if (ordenSeleccionado !== "none") {
     switch (ordenSeleccionado) {
       case "az": productos.sort((a, b) => a.nombre.localeCompare(b.nombre)); break;
@@ -71,7 +71,7 @@ const renderSegunCategoria = async (): Promise<void> => {
     }
   }
 
-  // D) RENDERIZADO DEL HTML DE PRODUCTOS
+  // RENDERIZADO 
   if (productos.length === 0) {
     productsContainer.innerHTML = `
       <div class="no-products-message" style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted);">
@@ -82,7 +82,7 @@ const renderSegunCategoria = async (): Promise<void> => {
   }
 
   productsContainer.innerHTML = productos.map(prod => {
-    // Validar Requisito: Botón Agregar al Carrito no disponible si stock = 0 o si no está disponible
+    //Botón Agregar al Carrito no disponible si stock = 0 o si no está disponible
     const sinStock = prod.stock <= 0;
     
     return `
@@ -116,7 +116,7 @@ const configurarBotonesCarrito = (): void => {
 
   btnsAgregar.forEach(btn => {
     btn.addEventListener('click', async (e) => {
-      // Verificar permisos con tu guarda pedagógica
+      
       if (!verificarPermiso(e)) return;
 
       const id = parseInt((e.currentTarget as HTMLButtonElement).getAttribute('data-id')!);
@@ -124,9 +124,7 @@ const configurarBotonesCarrito = (): void => {
       const productoSeleccionado = productos.find(p => p.id === id);
 
       if (productoSeleccionado && usuarioActivo?.mail) {
-        // Añadir al storage del carrito por email
         await addToCart(productoSeleccionado, 1, usuarioActivo.mail);
-        // Actualizar el numerito del carrito en el navbar
         await actualizarBadgeNavbar();
       }
     });
@@ -149,7 +147,7 @@ const configurarClickDetalle = (): void => {
 const verificarPermiso = (e: Event): boolean => {
   const { isInvitado, isAdmin } = obtenerEstadoCliente();
   if (isAdmin) {
-    alert("Los administradores no pueden realizar compras en la tienda.");
+    AlertService.warning("Error","Los administradores no pueden realizar compras en la tienda.");
     return false;
   } else if (isInvitado) {
     e.stopImmediatePropagation();
@@ -179,9 +177,9 @@ const main = document.getElementById("main-view");
 
 if (validarAccesoRuta()) {
   main?.classList.add("main-content-block");
-  configurarFiltroCategorias();
-  configurarControlesHerramientas();
-  
-  // Render inicial con todo en 'todas' y 'none'
-  renderSegunCategoria();
+  renderSegunCategoria().then(() => {
+      configurarFiltroCategorias();
+      configurarControlesHerramientas();
+    });
 }
+

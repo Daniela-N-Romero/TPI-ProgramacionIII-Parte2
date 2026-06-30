@@ -2,7 +2,7 @@ import { ModalService } from "../../../utils/modals/modal";
 import type { FormaPago, IOrder } from "../../../types/IOrder";
 import { clearCart, removeFromCart, getCartTotal, updateCartItemQuantity, getCartByEmail } from "../../../utils/storage/cartStorage";
 import { getActiveUser } from "../../../utils/storage/userStorage";
-import { registrarNuevoPedidoDelCliente } from "../../../utils/storage/orderStorage";
+import { getOrders, getOrdersByEmail, registrarNuevoPedidoDelCliente } from "../../../utils/storage/orderStorage";
 import { AlertService } from "../../../utils/modals/alert";
 import { actualizarBadgeNavbar } from "../../../utils/layout";
 import { getProduct, saveOrUpdateProduct } from "../../../utils/storage/productStorage";
@@ -98,7 +98,8 @@ const vincularEventosAcciones = (email: string): void => {
             cantidadActual.textContent = (numeroActual + 1).toString();
             //sumamos 1 por cada click
             await updateCartItemQuantity(id, item.cantidad + 1, email);
-            await actualizarBadgeNavbar()
+            await actualizarBadgeNavbar();
+            renderizarCarrito(email);
 
 
         } else if (target.classList.contains("btn-minus")) {
@@ -181,10 +182,11 @@ const abrirModalCheckout = async (email: string): Promise<void> => {
 };
 
 const procesarConfirmacionPedido = async (formaPago: FormaPago, total: number): Promise<void> => {
-    const usuarioLogueado = getActiveUser();
+    const usuarioLogueado = getActiveUser(); 
     const cart = await getCartByEmail(usuarioLogueado.mail);
+    const orders = await getOrdersByEmail(usuarioLogueado.mail);
     const nuevoPedido: IOrder = {
-        id: cart.length,
+        id: orders.length+1,
         fecha: new Date().toISOString(),
         estado: "PENDIENTE",
         total: total,

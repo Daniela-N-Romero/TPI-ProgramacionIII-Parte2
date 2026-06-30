@@ -15,7 +15,6 @@ export const removeFromCart = async (email: string, productId: number) => {
   saveCartByEmail(email, cartFiltrado);
 };
 
-// Agregar al carito desde la tienda (o actualizar cantidad si ya existe) - TO DO: respetar el stock disponible 
 export async function addToCart(product: IProduct, cantidad: number = 1, userEmail: string): Promise<void> {
   const cart = await getCartByEmail(userEmail);
   const itemIndex = cart.findIndex(item => item.producto.id === product.id);
