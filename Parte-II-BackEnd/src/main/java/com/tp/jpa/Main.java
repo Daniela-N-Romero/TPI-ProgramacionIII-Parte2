@@ -469,7 +469,7 @@ public class Main {
             System.out.println("2. Modificar");
             System.out.println("3. Baja lógica");
             System.out.println("4. Listado");
-            System.out.println("5. Buscar usuarrio por mail");
+            System.out.println("5. Buscar usuario por mail");
             System.out.println("0. Volver");
             System.out.print("Seleccione una opción: ");
             try {
@@ -894,9 +894,8 @@ public class Main {
                     System.out.println("\n--- LISTADO GENERAL DE PEDIDOS ---");
                     EntityManager emListado = JPAUtil.getEntityManagerFactory().createEntityManager();
                     try {
-                        // Consultamos directamente los Pedidos, pero cruzamos con Usuario en el WHERE
-                        // usando la colección del elemento para saber a quién le pertenece.
-                        String jpql = "SELECT p, u FROM Usuario u JOIN u.pedidos p WHERE u.eliminado = false AND p.eliminado = false ORDER BY p.id ASC";
+                        // Consultamos directamente los Pedidos, pero cruzamos con Usuario para saber a quién le pertenece.
+                        String jpql = "SELECT p, u FROM Usuario u JOIN u.pedidos p WHERE  p.eliminado = false ORDER BY p.id ASC";
                         List<Object[]> resultados = emListado.createQuery(jpql, Object[].class).getResultList();
 
                         if (resultados.isEmpty()) {

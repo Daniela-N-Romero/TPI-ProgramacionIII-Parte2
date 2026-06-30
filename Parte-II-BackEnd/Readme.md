@@ -1,42 +1,109 @@
-# TPI Parte II - Programación III (TUPaD)
+# Sistema de Gestión de Pedidos - TPI JPA/Hibernate (Parte 2)
 
-//TO DO actualizar readme
-
-## 📝 Descripción del Proyecto
-Este proyecto consiste en el desarrollo del backend para un sistema de gestión de catálogo de productos y categorías, diseñado sobre una arquitectura persistente utilizando **JPA (Jakarta Persistence)** e **Hibernate** como proveedor.
-
-El sistema implementa el patrón **Repository Genérico** para centralizar y abstraer por completo las operaciones CRUD elementales, desacoplando la lógica de negocio de los detalles de la base de datos embebida **H2**. Toda la interacción con el usuario se realiza a través de una interfaz interactiva por línea de comandos (Consola), controlando de manera segura el ciclo de vida del `EntityManager` en cada transacción.
-
-### 🚀 Tecnologías Utilizadas
-* **Java SE 21**
-* **Jakarta Persistence API (JPA) 3.1**
-* **Hibernate Core 6.x**
-* **Base de Datos H2** (Modo embebido / archivo local)
-* **Gradle** (Gestor de dependencias y automatización)
+Este proyecto consiste en una aplicación de consola robusta desarrollada en Java utilizando **JPA (Java Persistence API)** e **Hibernate** como proveedor de persistencia para gestionar el ciclo de vida de un sistema de comercio electrónico (Categorías, Productos, Usuarios, Pedidos y Reportes Financieros).
 
 ---
 
-## 🏗️ Arquitectura y Patrones de Diseño
-* **Generic Repository Pattern:** Uso de interfaces y clases abstractas con tipos genéricos (`<T extends Base>`) para unificar la persistencia de datos.
-* **EntityManager-per-operation:** Cada método del repositorio gestiona la apertura de su propio contexto y garantiza su cierre inmediato en bloques `finally`, evitando fugas de conexiones (*connection leaks*).
-* **Control Transaccional Seguro:** Manejo de excepciones con `rollback` explícito ante fallos de base de datos para mantener la integridad de los datos.
-* **Uso de Optional:** Implementación de `Optional<T>` en las búsquedas por ID para encapsular la presencia o ausencia de registros de forma limpia y moderna.
-* **Baja Lógica:** Cumplimiento de políticas de negocio donde ningún registro se elimina físicamente; se manipula el estado mediante una bandera `eliminado = true`.
+## Estructura del Proyecto
+
+El proyecto sigue una arquitectura organizada en capas bien definidas (Entidades, Repositorios, Servicios/Menús):
+
+```text
+src/
+├── main/
+│   ├── java/
+│   │   └── com/
+│   │       └── tp/
+│   │           └── jpa/
+│   │               ├── Main.java                 # Punto de entrada y gestión de menús por consola
+│   │               ├── model/
+│   │               │   └── entities/             # Capa de modelo (Entidades mapeadas con JPA)
+│   │               │       ├── Categoria.java
+│   │               │       ├── Producto.java
+│   │               │       ├── Usuario.java
+│   │               │       ├── Pedido.java
+│   │               │       ├── DetallePedido.java
+│   │               │       └── EstadoPedido.java # Enum (PENDIENTE, CONFIRMADO, TERMINADO, CANCELADO)
+│   │               ├── repository/               # Capa de acceso a datos (Patrón Repository)
+│   │               │   ├── BaseRepository.java
+│   │               │   ├── BaseRepositoryImpl.java
+│   │               │   ├── CategoriaRepository.java
+│   │               │   ├── ProductoRepository.java
+│   │               │   ├── UsuarioRepository.java
+│   │               │   └── PedidoRepository.java
+│   │               └── util/
+│   │                   └── JPAUtil.java          # Configuración y obtención del EntityManagerFactory
+│   └── resources/
+│       └── META-INF/
+│           └── persistence.xml                  # Archivo de configuración JPA/Hibernate
+
+
+```
+---
+
+## Requisitos e Instalación
+
+### Requisitos Previos: 
+- Java JDK 17 o superior.
+- Gradle o Maven como gestor de dependencias.
+- Motor de Base de Datos MySQL (o compatible). 
+
+### Pasos para la Configuración
+
+#### Configurar la Base de Datos:
+
+- Crea un esquema vacío en tu motor de base de datos con el nombre tpi_jpa (o el nombre que prefieras).
+- Configurar el archivo persistence.xml: Asegúrate de ajustar los datos de conexión (usuario y contraseña de tu motor SQL) en el archivo src/main/resources/META-INF/persistence.xml.
+
+### Compilar y Ejecutar:
+
+Si utilizas Gradle, ejecuta el proyecto desde la terminal o tu IDE favorito corriendo el archivo Main. 
 
 ---
 
-## 🛠️ Requisitos Previos
-Antes de ejecutar la aplicación, asegúrate de tener instalado:
-* **Java Development Kit (JDK) 21** o superior.
-* **Gradle** (opcional, incluido mediante el `gradlew` wrapper del proyecto).
+## Diseño y Mapeo JPA
+
+
+
+### Relaciones del Dominio
+
+
+- **Categoría - Producto (One-to-Many)**: Una categoría conoce múltiples productos. El borrado lógico de una categoría no elimina físicamente sus productos. 
+
+
+- **Pedido - DetallePedido (One-to-Many)**: Un pedido posee un listado de detalles que representan el carrito de compras. Se aplica cascada total (ALL) y eliminación de huérfanos (orphanRemoval = true), ya que un DetallePedido no tiene sentido de existir sin su Pedido contenedor.  
+
+
+- **Usuario - Pedido (Relación Unidireccional One-to-Many)**: El Usuario tiene una colección de pedidos: @OneToMany List<Pedido> pedidos.
+
+
+- **El Pedido NO conoce al Usuario (no posee un atributo Usuario usuario)**. Esto simplifica el acoplamiento pero requiere de técnicas avanzadas de consulta (JPQL) para obtener al cliente dueño de una orden.
+
+
+### Transacciones y el ciclo de vida de EntityManager
+
+
+El corazón de la consistencia transaccional del sistema reside en el correcto manejo de la sesión JPA mediante EntityManager.
+
+- Alta de Pedido Atómica (HU-16)
+
+Para asegurar que un pedido se registre de manera correcta sin inconsistencias (como quedarse sin stock a mitad de la carga o que se registre un pago sin decrementar la base de datos), se implementó un proceso Atómico controlado por transacciones explícitas:
+
+-  Se valida el stock temporal de cada producto solicitado.
+- Se inicia una transacción activa: em.getTransaction().begin().
+- Se resta de forma definitiva el stock en la base de datos para cada producto del pedido.
+- Se persiste la orden de compra en cascada.
+- Si ocurre cualquier error, falta de stock de último momento o excepción inesperada, se ejecuta un Rollback inmediato (em.getTransaction().rollback()) devolviendo la base de datos a su estado original intacto.
 
 ---
+## Tecnologías Utilizadas
 
-## 🏃 Instrucciones de Ejecución
 
-Sigue estos pasos para clonar, compilar y ejecutar el proyecto localmente:
 
-### 1. Compilar el Proyecto
-Abre una terminal en la ruta raíz del proyecto y ejecuta el siguiente comando para limpiar y compilar los recursos:
-```bash
-./gradlew build -x test
+Lenguaje: Java 17
+
+Framework ORM: JPA 2.2 / Hibernate Core 6.x
+
+Base de Datos: MySQL Connector/J
+
+Motor de persistencia: JDBC integrado a través de JPA
