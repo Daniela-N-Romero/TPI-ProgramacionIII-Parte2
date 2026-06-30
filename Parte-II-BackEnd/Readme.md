@@ -1,5 +1,13 @@
-# Sistema de Gestión de Pedidos - TPI JPA/Hibernate (Parte 2)
+# TPI PROGRAMACIÓN III
+## Sistema de Gestión de Pedidos - TPI JPA/Hibernate (Parte 2)
 
+### Datos de la alumna
+* **Nombre:** Daniela Nahir Romero
+* **Carrera:** Tecnicatura Universitaria en Programación (TUPaD)
+* **DNI:** N° 38.440.237
+* **Comisión:** N° 15
+
+---
 Este proyecto consiste en una aplicación de consola robusta desarrollada en Java utilizando **JPA (Java Persistence API)** e **Hibernate** como proveedor de persistencia para gestionar el ciclo de vida de un sistema de comercio electrónico (Categorías, Productos, Usuarios, Pedidos y Reportes Financieros).
 
 ---
