@@ -14,6 +14,8 @@ Este proyecto es una aplicación web multipágina orientada al comercio gastron�
 
 El sistema divide los privilegios de navegación de forma estricta mediante roles (`ADMIN` y `USUARIO`), además de proveer una experiencia fluida de consulta interactiva para usuarios no registrados bajo un esquema de sesión abierta de lectura.
 
+*VIDEO EXPLICATIVO:* https://youtu.be/Sn36F2VcxaE 
+
 ---
 
 ## 🔑 Credenciales de Prueba 

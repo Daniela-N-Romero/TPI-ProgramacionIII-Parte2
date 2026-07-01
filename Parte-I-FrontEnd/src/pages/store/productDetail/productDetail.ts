@@ -1,9 +1,10 @@
 import { validarAccesoRuta, obtenerEstadoCliente, navigate } from "../../../../src/utils/guards/guards";
 import { getProduct } from "../../../utils/storage/productStorage";
-import { addToCart } from "../../../utils/storage/cartStorage";
+import { addToCart, getCartByEmail } from "../../../utils/storage/cartStorage";
 import { getActiveUser } from "../../../utils/storage/userStorage";
 import { actualizarBadgeNavbar } from "../../../utils/layout";
 import { AlertService } from "../../../utils/modals/alert";
+import type { ICartItem } from "../../../types/ICart";
 
 // Ejecutamos la lógica principal si la ruta está permitida
 
@@ -21,7 +22,7 @@ const main = document.getElementById("main-view");
 
 main?.classList.add("main-content-block")
 if (validarAccesoRuta()) {
-    renderProductDetail();
+    await renderProductDetail();
     await actualizarBadgeNavbar();
 }
 
@@ -49,9 +50,22 @@ async function renderProductDetail(): Promise<void> {
     // 3. Verificamos el rol del usuario actual
     const { isAdmin, isInvitado } = obtenerEstadoCliente();
 
+    let stockDisponibleReal = producto.stock;
+    if (!isInvitado && !isAdmin) {
+        const user = getActiveUser();
+        const cart = await getCartByEmail(user.mail);
+        // Buscamos si el producto ya existe en el carrito actual
+        const itemEnCarrito = cart?.find((item: ICartItem) => item.producto.id === producto.id);
+        if (itemEnCarrito) {
+            stockDisponibleReal = producto.stock - itemEnCarrito.cantidad;
+        }
+    }
+
+    const valorInicialInput = stockDisponibleReal > 0 ? 1 : 0;
+
     // 4. Inyectamos la estructura de dos columnas solicitada en el diseño
     mainView.innerHTML = `
-        <div class="detail-container">
+    <div class="detail-container">
             <div class="detail-image-side">
                 <img src="${producto.imagen || 'https://via.placeholder.com/500'}" alt="${producto.nombre}" class="detail-img">
             </div>
@@ -62,17 +76,17 @@ async function renderProductDetail(): Promise<void> {
                 
                 <div class="detail-meta">
                     <span class="detail-price">$${producto.precio}</span>
-                    <span class="detail-stock">Stock disponible: <strong>${producto.stock}</strong></span>
+                    <span class="detail-stock">Stock disponible: <strong>${stockDisponibleReal}</strong></span>
                 </div>
 
                 <div class="detail-actions-box ${isAdmin ? 'hidden' : ''}">
                     <div class="quantity-selector">
                         <button type="button" class="qty-btn" id="btn-minus">-</button>
-                        <input type="number" id="input-quantity" value="1" min="1" max="${producto.stock}" readonly>
+                        <input type="number" id="input-quantity" value="${valorInicialInput}" min="${valorInicialInput}" max="${stockDisponibleReal}" readonly>
                         <button type="button" class="qty-btn" id="btn-plus">+</button>
                     </div>
-                    <button class="btn btn-primary btn-add-detail" id="btn-add-to-cart" data-id="${producto.id}">
-                        Agregar al carrito 🛒
+                    <button class="btn btn-primary btn-add-detail" id="btn-add-to-cart" data-id="${producto.id}" ${stockDisponibleReal <= 0 ? 'disabled style="background: #cbd5e1; cursor: not-allowed;"' : ''}>
+                        ${stockDisponibleReal > 0 ? 'Agregar al carrito 🛒' : 'Sin stock disponible'}
                     </button>
                 </div>
 
@@ -84,7 +98,7 @@ async function renderProductDetail(): Promise<void> {
     `;
 
     // 5. Activamos los listeners de la interfaz
-    configurarComponentesDetalle(producto.stock, isInvitado);
+    configurarComponentesDetalle(stockDisponibleReal, isInvitado);
 }
 
 function configurarComponentesDetalle(maxStock: number, isInvitado: boolean): void {
@@ -118,7 +132,7 @@ function configurarComponentesDetalle(maxStock: number, isInvitado: boolean): vo
     btnAdd?.addEventListener("click", async(e) => {
         if (isInvitado) {
             e.stopImmediatePropagation();
-            alert("Debés iniciar sesión para añadir productos al carrito.");
+            AlertService.warning("No autorizado","Debés iniciar sesión para añadir productos al carrito.");
             navigate("/login");
             return;
         }
@@ -128,12 +142,15 @@ function configurarComponentesDetalle(maxStock: number, isInvitado: boolean): vo
         const producto = await getProduct(productoId);
         const cantidadAAgregar = Number(inputQty.value);
 
+        if (cantidadAAgregar <= 0) return;
+
         if (producto) {
             const user = getActiveUser();
             await addToCart(producto, cantidadAAgregar, user.mail);
             await actualizarBadgeNavbar();
             
             AlertService.success(`${producto.nombre} al carrito con éxito!`, `¡Se agregaron ${cantidadAAgregar} x ${producto.nombre}`)
+            await renderProductDetail();
         }
     });
 }

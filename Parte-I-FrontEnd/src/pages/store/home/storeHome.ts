@@ -105,8 +105,8 @@ const renderSegunCategoria = async (): Promise<void> => {
       </div>
     `;
   }).join('');
-  configurarBotonesCarrito();
   configurarClickDetalle();
+  configurarBotonesCarrito();
 };
 
 const configurarBotonesCarrito = (): void => {
@@ -116,7 +116,7 @@ const configurarBotonesCarrito = (): void => {
 
   btnsAgregar.forEach(btn => {
     btn.addEventListener('click', async (e) => {
-      
+      e.stopPropagation();
       if (!verificarPermiso(e)) return;
 
       const id = parseInt((e.currentTarget as HTMLButtonElement).getAttribute('data-id')!);
