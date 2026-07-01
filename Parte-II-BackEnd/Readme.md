@@ -10,6 +10,8 @@
 ---
 Este proyecto consiste en una aplicación de consola robusta desarrollada en Java utilizando **JPA (Java Persistence API)** e **Hibernate** como proveedor de persistencia para gestionar el ciclo de vida de un sistema de comercio electrónico (Categorías, Productos, Usuarios, Pedidos y Reportes Financieros).
 
+*VIDEO EXPLICATIVO:* https://youtu.be/Sn36F2VcxaE
+
 ---
 
 ## Estructura del Proyecto
