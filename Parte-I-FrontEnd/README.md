@@ -18,6 +18,119 @@ El sistema divide los privilegios de navegación de forma estricta mediante role
 
 ---
 
+### Estructura del Proyecto
+```
+|   .gitignore
+|   index.html            #Página de inicio
+|   package-lock.json
+|   package.json
+|   pnpm-lock.yaml
+|   README.md
+|   tsconfig.json
+|   vite.config.ts       #Detalle de rutas html con Vite
+|   
++---public
+|   |   favicon.svg
+|   |   icons.svg
+|   |   vite.svg
+|   |   
+|   \---data
+|           categorias.json
+|           pedidos.json
+|           productos.json
+|           usuarios.json
+|           
+\---src
+    |   main.ts
+    |   style.css
+    |   vite-env.d.ts
+    |   
+    +---assets
+    |       hero.png
+    |       typescript.svg
+    |       vite.svg
+    |       
+    +---pages
+    |   +---admin
+    |   |   +---adminHome        
+    |   |   |       home.html
+    |   |   |       home.ts
+    |   |   |       
+    |   |   +---categories              #Gestión de categorias
+    |   |   |       categorias.ts
+    |   |   |       categories.html
+    |   |   |       
+    |   |   +---orders                  #Gestión de Pedidos
+    |   |   |       manageOrders.html
+    |   |   |       manageOrders.ts
+    |   |   |       
+    |   |   \---products                #Gestión de Productos
+    |   |           products.html
+    |   |           products.ts
+    |   |           
+    |   +---auth                        #Autenticación
+    |   |   +---login
+    |   |   |       login.html
+    |   |   |       login.ts
+    |   |   |       
+    |   |   \---registro
+    |   |           registro.html
+    |   |           registro.ts
+    |   |           
+    |   +---client    #Vista exclusiva de usuario logueado: mis pedidos
+    |   |   \---orders
+    |   |           clientOrders.html
+    |   |           clientOrders.ts
+    |   |           
+    |   \---store
+    |       +---cart                         #Carrito de compras
+    |       |       cart.html  
+    |       |       cart.ts
+    |       |       
+    |       +---home                         #Tienda
+    |       |       storeHome.html
+    |       |       storeHome.ts
+    |       |       
+    |       \---productDetail                #Detalle de productos
+    |               productDetail.html
+    |               productDetail.ts
+    |               
+    +---types           #Types para seguridad de datos con Typescript
+    |       ICart.ts
+    |       ICategory.ts
+    |       IOrder.ts
+    |       IProduct.ts
+    |       IUser.ts
+    |       
+    \---utils                          #Lógica de fetch
+        |   fetch.ts
+        |   layout.ts
+        |   
+        +---auth                       #Lógica de autenticación
+        |       auth.ts
+        |       
+        +---guards                     #Lógica de redireccionamiento y
+        |       guards.ts              #acceso restringido
+        |
+        |       
+        +---modals                     #Modales y alerts personalizados
+        |       alert.ts
+        |       modal.ts
+        |       
+        +---orders                     #Funciones útiles para pedidos
+        |       orders.ts
+        |       
+        \---storage                   #Funciones que manejan el storage
+                cartStorage.ts
+                categoryStorage.ts
+                orderStorage.ts
+                productStorage.ts
+                storageBase.ts        #Archivo base de manejo de storage
+                userStorage.ts
+```
+
+---
+
 ## 🔑 Credenciales de Prueba 
 
 ### 👤 Perfil Cliente
@@ -67,6 +180,7 @@ La solución cubre de extremo a extremo los flujos principales del módulo Front
 
 - **Panel Administrativo Global (Dashboard)**: Visualización general de métricas financieras, administración interactiva con cambio de estados de pedidos en tiempo real mediante menús selectores y CRUDs en memoria de productos y categorías.
 ---
+
 ## 🚀 Optimizaciones de Arquitectura y "Toques Especiales" (Valor Agregado)
 
 Más allá de los lineamientos mínimos solicitados por la cátedra, se diseñó e implementó una infraestructura robusta orientada a **emular el comportamiento de una arquitectura escalable** de nivel empresarial:
@@ -105,3 +219,23 @@ Más allá de los lineamientos mínimos solicitados por la cátedra, se diseñó
 8. **Motor de Modales y Alertas Personalizadas (ModalService y AlertService)**
 
       Se sustituyeron los diálogos nativos y bloqueantes del navegador (alert()) por un servicio unificado de alertas modales estéticas y enriquecidas con estilos CSS adaptados a la paleta de colores del proyecto, mejorando radicalmente la cohesión visual en flujos críticos como faltas de stock, confirmaciones de vaciado de carrito y redirecciones exitosas.
+
+---
+
+## ⚙️ Enrutamiento Personalizado y Compilación Multipágina (`vite.config.ts`)
+
+Dado que Vite está diseñado de forma nativa para aplicaciones de una sola página (SPA), el desarrollo de un sistema con múltiples archivos `.html` independientes distribuidos en subcarpetas requería una intervención en el ciclo de vida del empaquetador. Se crearon dos optimizaciones avanzadas en la configuración:
+
+
+1. **Estrategia Multi-Input de Rollup (`rollupOptions.input`):** Se configuró explícitamente un mapa de resolución de rutas dinámicas mediante `resolve(__dirname, ...)` para instruir al compilador Rollup sobre la existencia y ubicación exacta de cada una de las 11 vistas físicas del sistema (Módulos de Auth, Clientes, Tienda y Administración). Esto garantiza que el proceso de *Build* (`pnpm run build`) genere un empaquetado de producción sin omitir ninguna vista o asset asociado.
+
+2. **Servidor Middleware con Reescritura de Rutas de Lectura Limpia (`html-rewriter-plugin`):**
+   Para evitar el uso de extensiones `.html` explícitas o rutas físicas extensas en la barra de direcciones que degradaran la experiencia de usuario (UX), se desarrolló un **plugin personalizado para el servidor de desarrollo**. 
+   Este intercepta los métodos de solicitud (`req.url`) en la capa de middleware de Connect y reescribe de forma interna la dirección hacia el recurso físico correspondiente sin provocar redirecciones HTTP de cara al cliente. Esto habilita un mapa de **URLs Amigables (*Pretty URLs*)** unificado para todo el ciclo de navegación. Algunos ejemplos de esto son:
+   * `/login` ➡️ `/src/pages/auth/login/login.html`
+   * `/tienda` ➡️ `/src/pages/store/home/storeHome.html`
+   * `/carrito` ➡️ `/src/pages/store/cart/cart.html`
+   * `/pedidos` ➡️ `/src/pages/client/orders/clientOrders.html`
+   * `/adminPanel` ➡️ `/src/pages/admin/adminHome/home.html`
+   
+   Tambien se incluyo soporte de parámetros variables dinámicos por query string mediante expresiones de coincidencia: `/producto?id=X`.
